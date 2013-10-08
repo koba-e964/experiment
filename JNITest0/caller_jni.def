@@ -1,0 +1,3 @@
+LIBRARY CallerNative.dll
+EXPORTS
+Java_Caller_func@12 @ 1
