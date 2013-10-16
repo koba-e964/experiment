@@ -3,8 +3,9 @@ module Kind
 	INT=2
 	STRING=3
 	CHAR=4
-	LIST=5
-	SYMBOL=6
+	PAIR=5
+	NULL=6
+	SYMBOL=7
 end
 
 class ScmSymbol
@@ -58,18 +59,30 @@ class SObj
 		@type=CHAR
 		@data=val
 	end
-	def set_list(val)
-		@type=LIST
-		@data=val
+	def set_pair(car,cdr)
+		@type=PAIR
+		@data=[car,cdr]
+	end
+	def set_null()
+		@type=NULL
+		@data=nil
 	end
 	def set_list(val)
 		@type=SYMBOL
 		@data=val
 	end
 	def to_s()
-		if type==LIST
-			if(data.nil?)
-				return "()"
+		if type==NULL
+			return "()"
+		end
+		if type==PAIR
+			if(data[1].type==PAIR)
+				tmp=data[1].to_s()
+				tmp=tmp[1..tmp.size()-1]
+				return "("+data[0].to_s()+" "+tmp
+			end
+			if(data[1].type==NULL)
+				return "("+data[0].to_s()+")"
 			end
 			return "("+data[0].to_s()+" . "+data[1].to_s()+")"
 		end
@@ -87,17 +100,14 @@ class SObj
 		end
 		return ""
 	end
-	def inspect()
-		return to_s()
-	end
 end
 
 def ary_to_SObj(ary)
 	obj=SObj.new()
 	if(ary.size()==0)
-		obj.set_list(nil)
+		obj.set_null()
 	else
-		obj.set_list [ ruby_to_SObj(ary[0]) , ary_to_SObj(ary[1..ary.size-1])]
+		obj.set_pair(ruby_to_SObj(ary[0]) , ary_to_SObj(ary[1..ary.size-1]))
 	end
 	return obj
 end
