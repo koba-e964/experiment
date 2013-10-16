@@ -67,7 +67,7 @@ class SObj
 		@type=NULL
 		@data=nil
 	end
-	def set_list(val)
+	def set_symbol(val)
 		@type=SYMBOL
 		@data=val
 	end
@@ -97,6 +97,9 @@ class SObj
 		end
 		if type==BOOL
 			return (if data then "#t" else "#f" end)
+		end
+		if type==SYMBOL
+			return data.name
 		end
 		return ""
 	end
@@ -131,6 +134,10 @@ def ruby_to_SObj(val)
 	end
 	if val==nil
 		obj.set_null()
+		return obj
+	end
+	if val.is_a? ScmSymbol
+		obj.set_symbol(val)
 		return obj
 	end
 end
