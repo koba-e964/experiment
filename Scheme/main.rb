@@ -129,4 +129,8 @@ def ruby_to_SObj(val)
 		obj.set_bool(val)
 		return obj
 	end
+	if val==nil
+		obj.set_null()
+		return obj
+	end
 end
