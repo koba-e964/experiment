@@ -5,6 +5,7 @@ module RbScmEval
 	extend RbScm
 	include RbScm
 	@@map=nil
+	module_function
 	def sobj_eval(sobj)
 		if @@map.nil?
 			@@map=SymMap.new()
@@ -27,7 +28,7 @@ module RbScmEval
 				cdr=cdr.data[1]
 			end
 			args=ruby_to_SObj(args) #convert args from array to list
-			puts "call("+func.to_s+", args="+args.to_s+")"
+			puts "call("+car.to_s+' => '+func.to_s+", args="+args.to_s+")"
 			if func.is_a? Proc
 				return func[args]
 			end
@@ -78,6 +79,7 @@ class SymMap #map: ScmSymbol->(SObj or Proc)
 end
 
 module RbScmEval
+	module_function
 	def add_initial_operator()
 		if @@map.nil?
 			@@map=SymMap.new()
@@ -95,5 +97,5 @@ module RbScmEval
 			return ruby_to_SObj(sum)
 		}
 	end
-	add_initial_operator()
 end
+RbScmEval::add_initial_operator()

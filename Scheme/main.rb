@@ -154,7 +154,6 @@ def ruby_to_SObj(val)
 		obj.set_str(val)
 		return obj
 	end
-	p val
 	if val==true || val==false
 		obj.set_bool(val)
 		return obj
