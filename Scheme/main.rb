@@ -27,6 +27,21 @@ class ScmSymbol
 		end
 		return true
 	end
+	def ==(another)
+		@name==another.name
+	end
+	def eql?(another)
+		@name==another.name
+	end
+	def hash()
+		return 0x33c0fb18^@name.hash
+	end
+	def to_s
+		@name
+	end
+	def inspect
+		"["+to_s+"]"
+	end
 end
 
 module RbScm
@@ -102,6 +117,9 @@ class SObj
 			return data.name
 		end
 		return ""
+	end
+	def inspect
+		"?"+to_s
 	end
 end
 
