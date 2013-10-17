@@ -119,7 +119,7 @@ class SObj
 		return ""
 	end
 	def ==(another)
-		return another.is_a? SObj &&
+		return (another.is_a? SObj) &&
 			@type==another.type &&
 			@data==another.data
 	end
@@ -139,6 +139,9 @@ def ary_to_SObj(ary)
 end
 
 def ruby_to_SObj(val)
+	if val.is_a? SObj
+		return val
+	end
 	if val.is_a? Array
 		return ary_to_SObj(val)
 	end
