@@ -28,10 +28,10 @@ class ScmSymbol
 		return true
 	end
 	def ==(another)
-		@name==another.name
+		(another.is_a? ScmSymbol) && @name==another.name
 	end
 	def eql?(another)
-		@name==another.name
+		(another.is_a? ScmSymbol) && @name==another.name
 	end
 	def hash()
 		return 0x33c0fb18^@name.hash
@@ -118,6 +118,11 @@ class SObj
 		end
 		return ""
 	end
+	def ==(another)
+		return another.is_a? SObj &&
+			@type==another.type &&
+			@data==another.data
+	end
 	def inspect
 		"?"+to_s
 	end
@@ -146,6 +151,7 @@ def ruby_to_SObj(val)
 		obj.set_str(val)
 		return obj
 	end
+	p val
 	if val==true || val==false
 		obj.set_bool(val)
 		return obj
