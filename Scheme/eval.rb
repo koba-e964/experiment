@@ -6,6 +6,12 @@ module RbScmEval
 	include RbScm
 	@@map=nil
 	module_function
+	def pair_divide(sobj)
+		if sobj.type!=PAIR
+			raise 'sobj must be a pair, given:'+sobj.to_s
+		end
+		return [sobj.data[0],sobj.data[1]]
+	end
 	def sobj_eval(sobj)
 		if @@map.nil?
 			@@map=SymMap.new()
@@ -94,6 +100,26 @@ module RbScmEval
 				varargs=cdr
 			end
 			raise 'the terminal of list must be ()' unless varargs.type==NULL
+			return ruby_to_SObj(sum)
+		}
+		@@map[symbol('-')]=lambda{|varargs| #argument is passed as a list
+			#(>= (length varargs) 1)
+			sum=0
+			if(varargs.type==NULL)
+				raise '- requires at least 1 argument'
+			end
+			car,cdr=pair_divide(varargs)
+			raise 'int required, but given:'+car.to_s unless car.type==INT
+			if(cdr.type==NULL)
+				return ruby_to_SObj(-car.data)
+			end
+			sum=car.data
+			while cdr.type==PAIR
+				car,cdr=pair_divide(cdr)
+				raise car.to_s+' is not an int' unless car.type==INT
+				sum-=car.data
+			end
+			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
 		}
 	end
