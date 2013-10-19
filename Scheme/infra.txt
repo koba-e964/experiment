@@ -1,0 +1,17 @@
+(define (not val) (if val #f #t))
+
+
+(define (list . va)  va)
+(define (length ls)
+  (letrec ((mlh
+    (lambda (ls n) (if(null? ls)n (mlh(cdr ls)(+ n 1))))
+  )) (mlh ls 0))
+)
+(define (take ls i)
+  (if (and (exact? i)(>= i 0))
+    (if (= i 0) ()
+      (if (null? ls) (error "list too short") (cons (car ls)(my-take (cdr ls) (- i 1))))
+    )
+    (error "invalid index")
+  )
+)
