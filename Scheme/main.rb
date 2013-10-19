@@ -128,42 +128,45 @@ class SObj
 	end
 end
 
-def ary_to_SObj(ary)
-	obj=SObj.new()
-	if(ary.size()==0)
-		obj.set_null()
-	else
-		obj.set_pair(ruby_to_SObj(ary[0]) , ary_to_SObj(ary[1..ary.size-1]))
-	end
-	return obj
-end
-
-def ruby_to_SObj(val)
-	if val.is_a? SObj
-		return val
-	end
-	if val.is_a? Array
-		return ary_to_SObj(val)
-	end
-	obj=SObj.new()
-	if val.is_a? Integer
-		obj.set_int(val)
+module RbScm
+	module_function
+	def ary_to_SObj(ary)
+		obj=SObj.new()
+		if(ary.size()==0)
+			obj.set_null()
+		else
+			obj.set_pair(ruby_to_SObj(ary[0]) , ary_to_SObj(ary[1..ary.size-1]))
+		end
 		return obj
 	end
-	if val.is_a? String
-		obj.set_str(val)
-		return obj
-	end
-	if val==true || val==false
-		obj.set_bool(val)
-		return obj
-	end
-	if val==nil
-		obj.set_null()
-		return obj
-	end
-	if val.is_a? ScmSymbol
-		obj.set_symbol(val)
-		return obj
+	
+	def ruby_to_SObj(val)
+		if val.is_a? SObj
+			return val
+		end
+		if val.is_a? Array
+			return ary_to_SObj(val)
+		end
+		obj=SObj.new()
+		if val.is_a? Integer
+			obj.set_int(val)
+			return obj
+		end
+		if val.is_a? String
+			obj.set_str(val)
+			return obj
+		end
+		if val==true || val==false
+			obj.set_bool(val)
+			return obj
+		end
+		if val==nil
+			obj.set_null()
+			return obj
+		end
+		if val.is_a? ScmSymbol
+			obj.set_symbol(val)
+			return obj
+		end
 	end
 end

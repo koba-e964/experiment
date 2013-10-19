@@ -111,6 +111,7 @@ end
 
 module RbScmEval
 	module_function
+	extend RbScm
 	def add_initial_operator()
 		if @@map.nil?
 			@@map=SymMap.new()
