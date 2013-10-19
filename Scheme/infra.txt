@@ -15,3 +15,13 @@
     (error "invalid index")
   )
 )
+(define (reverse ls)
+  (letrec ((mrs
+    (lambda (l1 l2)
+      (if (null? l1)
+        l2
+        (mrs(cdr l1)(cons(car l1)l2))
+      )
+    )
+  )) (mrs ls ()))
+)
