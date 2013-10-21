@@ -108,6 +108,8 @@ end #module RbScmTokenize
 module RbScmParse
 	extend RbScm
 	include RbScm
+	@@syntaxes=["quote","lambda","if","set!","begin","cond","and","or","case","let",
+		"let*","letrec","do","delay","quasiquote"]
 	def bool?(str)
 		if str[0]!='#'
 			return false

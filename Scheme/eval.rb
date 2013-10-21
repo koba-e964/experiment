@@ -58,7 +58,7 @@ module RbScmEval
 	end
 	def apply_lambda(lmd,args,local)
 		aa,param=pair_divide(lmd)
-		raise 'not lambda' unless aa.type==SYMBOL && aa.data==symbol('lambda')
+		raise 'not lambda' unless aa.type==SYNTAX && aa.data==syntax('lambda')
 		param,expr=pair_divide(param)
 		expr,null_list=pair_divide(expr)
 		raise 'too many arguments(required:3):'+null_list.to_s unless null_list.type==NULL
@@ -148,7 +148,7 @@ module RbScmEval
 			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
 		}
-		@@map[symbol('add2')]=ruby_to_SObj([symbol('lambda'),[symbol('a'),symbol('b')],[symbol('+'),symbol('a'),symbol('b')]])
+		@@map[symbol('add2')]=ruby_to_SObj([syntax('lambda'),[symbol('a'),symbol('b')],[symbol('+'),symbol('a'),symbol('b')]])
 	end
 end
 RbScmEval::add_initial_operator()
