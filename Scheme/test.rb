@@ -45,7 +45,10 @@ token1=tokenize("`(,@(list 2 3) x p)")
 puts token1
 
 #test of RbScmParse
+include RbScmParse
 
 parse0=parse_expr(tokenize("()"))
 p parse0
 
+parse1=parse_expr(tokenize("(1 2 3 +)"))
+p parse1

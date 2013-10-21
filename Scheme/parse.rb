@@ -117,6 +117,25 @@ module RbScmParse
 		raise 'bool(#t|#f) required in:'+str unless bool?(str)
 		return [RbScm::ruby_to_SObj(str[1]=='t'),1]
 	end
+	def num?(ary)
+		#only decimal integers are admitted. TODO FIXME
+		s="0123456789"
+		str=ary[0]
+		for ch in str.chars.map{|v|v}
+			return false if s.index(ch).nil?
+		end
+		return true
+	end
+	def parse_num(ary)
+		raise 'not a decimal int' unless num?(ary)
+		sum=0
+		str=ary[0]
+		for ch in str.chars.map{|v|v}
+			n=ch.ord-48
+			sum=10*sum+n
+		end
+		return [ruby_to_SObj(sum),1]
+	end
 	def list?(ary)
 		ary[0]=='('
 	end
@@ -143,6 +162,9 @@ module RbScmParse
 	def parse_expr(ary)
 		if list?(ary)
 			return parse_list(ary)
+		end
+		if num?(ary)
+			return parse_num(ary)
 		end
 		[ruby_to_SObj(nil),1]
 	end
