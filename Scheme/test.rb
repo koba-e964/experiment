@@ -41,3 +41,6 @@ token0=tokenize(<<EOS)
 )
 EOS
 p token0
+token1=tokenize("`(,@(list 2 3) x p)")
+puts token1
+

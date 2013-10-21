@@ -60,6 +60,35 @@ module RbScmTokenize
 				ptr+=1
 				cur=''
 				next
+			when '#'
+				if str[ptr+1]=='('
+					ary+=['#(']
+					ptr+=2
+					cur=''
+					next
+				end
+				next
+			when "'"
+				ary+=[cur,"'"]
+				ptr+=1
+				cur=''
+				next
+			when "`"
+				ary+=[cur,"`"]
+				ptr+=1
+				cur=''
+				next
+			when ","
+				ary+=[cur]
+				if(str[ptr+1]=='@')
+					ary+=[",@"]
+					ptr+=2
+					cur=''
+					next
+				end
+				ptr+=1
+				cur=''
+				next
 			end
 			if ch.ord<=32 #space
 				ary+=[cur]
