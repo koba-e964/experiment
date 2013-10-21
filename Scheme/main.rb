@@ -51,6 +51,9 @@ class ScmSyntax
 	attr_accessor :name
 	@@syntaxes=["quote","lambda","if","set!","begin","cond","and","or","case","let",
 		"let*","letrec","do","delay","quasiquote"]
+	def self.syntax()
+		@@syntaxes
+	end
 	def initialize(name)
 		raise unless ScmSyntax::valid?(name.downcase)
 		@name=name.downcase
@@ -109,6 +112,8 @@ class SObj
 		@data=val
 	end
 	def set_pair(car,cdr)
+		raise unless car.is_a? SObj
+		raise unless cdr.is_a? SObj
 		@type=PAIR
 		@data=[car,cdr]
 	end
@@ -210,5 +215,10 @@ module RbScm
 			obj.set_syntax(val)
 			return obj
 		end
+	end
+	def make_pair(car,cdr)
+		obj=SObj.new()
+		obj.set_pair(car,cdr)
+		return obj
 	end
 end

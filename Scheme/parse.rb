@@ -110,15 +110,41 @@ module RbScmParse
 	include RbScm
 	@@syntaxes=["quote","lambda","if","set!","begin","cond","and","or","case","let",
 		"let*","letrec","do","delay","quasiquote"]
-	def bool?(str)
-		if str[0]!='#'
-			return false
-		end
-		return str[1]=='t' || str[1]=='f'
+	def bool?(ary)
+		return ary[0]=='#t' || ary[0]=='#f'
 	end
-	def parse_bool(str)
+	def parse_bool(ary)
 		raise 'bool(#t|#f) required in:'+str unless bool?(str)
-		return RbScm::ruby_to_SObj(str[1]=='t')
+		return [RbScm::ruby_to_SObj(str[1]=='t'),1]
+	end
+	def list?(ary)
+		ary[0]=='('
+	end
+	def parse_list(ary)
+		raise 'not list' unless list?(ary)
+		sum=1
+		pool=[]
+		while(sum<ary.size() && ary[sum]!=')')
+			if(ary[sum]=='.') #improper list
+				sobj,ind=parse_expr(ary[sum...ary.size])
+				if(ary[sum+ind]!=')')
+					raise 'invalid improper list:'+ary.inspectz
+				end
+				pool[pool.size-1]=make_pair(pool[pool.size-1], sobj)
+				sum+=ind
+				break
+			end
+			sobj,ind=parse_expr(ary[sum...ary.size])
+			pool+=[sobj]
+			sum+=ind
+		end
+		return [ruby_to_SObj(pool),sum+1]
+	end
+	def parse_expr(ary)
+		if list?(ary)
+			return parse_list(ary)
+		end
+		[ruby_to_SObj(nil),1]
 	end
 end # module RbScmParse
 
