@@ -1,6 +1,6 @@
 require './main.rb'
 require './eval.rb'
-
+require './parse.rb'
 
 #test of  ruby_to_SObj
 
@@ -25,3 +25,19 @@ sexp2=ruby_to_SObj([symbol('add2'),5,10])
 #(add2 5 10)
 p sobj_eval(sexp2)
 
+#test of tokenize()
+include RbScmTokenize
+
+token0=tokenize(<<EOS)
+(define (reverse ls)
+  (letrec ((mrs
+    (lambda (l1 l2)
+      (if (null? l1)
+        l2
+        (mrs(cdr l1)(cons(car l1)l2))
+      )
+    )
+  )) (mrs ls ()))
+)
+EOS
+p token0
