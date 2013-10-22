@@ -151,7 +151,6 @@ module RbScmEval
 			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
 		})
-		define_global(symbol('add2'),ruby_to_SObj([syntax('lambda'),[symbol('a'),symbol('b')],[symbol('+'),symbol('a'),symbol('b')]]))
 	end
 end
 RbScmEval::add_initial_operator()

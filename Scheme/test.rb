@@ -21,6 +21,10 @@ sexp1=ruby_to_SObj([symbol('-'),2,3,[symbol('-'),100],[symbol('-'),3,2]])
 #(- 2 3 (- 100) (- 3 2) ---->98
 p sobj_eval(sexp1)
 
+include RbScmTokenize
+include RbScmParse
+sfunc0,slen0=parse_expr(tokenize('(lambda (a b) (+ a b))'))
+define_global(symbol('add2'),sfunc0)
 sexp2=ruby_to_SObj([symbol('add2'),5,10])
 #(add2 5 10)
 p sobj_eval(sexp2)
