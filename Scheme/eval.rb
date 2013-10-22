@@ -12,6 +12,9 @@ module RbScmEval
 		end
 		return [sobj.data[0],sobj.data[1]]
 	end
+	def define_global(sym,obj)
+		@@map[sym]=obj
+	end
 	def sobj_eval(sobj)
 		return sobj_eval_sym(sobj,SymMap.new())
 	end
@@ -45,9 +48,9 @@ module RbScmEval
 		when INT
 			return sobj.clone
 		when SYMBOL
-			res=@@map[sobj.data]
+			res=local[sobj.data]
 			if res.nil?
-				res=local[sobj.data]
+				res=@@map[sobj.data]
 			end
 			if res.nil?
 				raise "symbol '"+sobj.to_s+"' not found"
@@ -116,7 +119,7 @@ module RbScmEval
 		if @@map.nil?
 			@@map=SymMap.new()
 		end
-		@@map[symbol('+')]=lambda{|varargs| #argument is passed as a list
+		define_global(symbol('+'),lambda{|varargs| #argument is passed as a list
 			sum=0
 			while varargs.type==PAIR
 				car=varargs.data[0]
@@ -127,8 +130,8 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless varargs.type==NULL
 			return ruby_to_SObj(sum)
-		}
-		@@map[symbol('-')]=lambda{|varargs| #argument is passed as a list
+		})
+		define_global(symbol('-'),lambda{|varargs| #argument is passed as a list
 			#(>= (length varargs) 1)
 			sum=0
 			if(varargs.type==NULL)
@@ -147,8 +150,8 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
-		}
-		@@map[symbol('add2')]=ruby_to_SObj([syntax('lambda'),[symbol('a'),symbol('b')],[symbol('+'),symbol('a'),symbol('b')]])
+		})
+		define_global(symbol('add2'),ruby_to_SObj([syntax('lambda'),[symbol('a'),symbol('b')],[symbol('+'),symbol('a'),symbol('b')]]))
 	end
 end
 RbScmEval::add_initial_operator()
