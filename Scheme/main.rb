@@ -7,6 +7,7 @@ module Kind
 	NULL=6
 	SYMBOL=7
 	SYNTAX=8
+	VECTOR=9
 end
 
 class ScmSymbol
@@ -129,6 +130,10 @@ class SObj
 		@type=SYNTAX
 		@data=val
 	end
+	def set_vector(val)
+		@type=VECTOR
+		@data=val
+	end
 	def to_s()
 		if type==NULL
 			return "()"
@@ -158,6 +163,14 @@ class SObj
 		end
 		if type==SYMBOL || type==SYNTAX
 			return data.name
+		end
+		if type==VECTOR
+			str='#('
+			for el in data
+				str+=el.to_s
+				str+=' '
+			end
+			return (if(data.size==0) then '#(' else str[0...str.size-1] end)+')'
 		end
 		return ""
 	end
@@ -219,6 +232,11 @@ module RbScm
 	def make_pair(car,cdr)
 		obj=SObj.new()
 		obj.set_pair(car,cdr)
+		return obj
+	end
+	def make_vector(elem)
+		obj=SObj.new
+		obj.set_vector(elem)
 		return obj
 	end
 end

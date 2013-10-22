@@ -42,7 +42,7 @@ token0=tokenize(<<EOS)
 EOS
 p token0
 token1=tokenize("`(,@(list 2 3) x p)")
-puts token1
+print token1
 
 #test of RbScmParse
 include RbScmParse
@@ -52,3 +52,6 @@ p parse0
 
 parse1=parse_expr(tokenize("(1 2 3 +)"))
 p parse1
+
+parse2=parse_expr(tokenize("( #(7 8 9)#(11)#())"))
+p parse2

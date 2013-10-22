@@ -159,12 +159,30 @@ module RbScmParse
 		end
 		return [ruby_to_SObj(pool),sum+1]
 	end
-	def parse_expr(ary)
-		if list?(ary)
-			return parse_list(ary)
+	def vector?(ary)
+		return ary[0]=='#('
+	end
+	def parse_vector(ary)
+		raise 'not vector' unless vector?(ary)
+		sum=1
+		pool=[]
+		while(sum<ary.size() && ary[sum]!=')')
+			sobj,ind=parse_expr(ary[sum...ary.size])
+			pool+=[sobj]
+			sum+=ind
 		end
-		if num?(ary)
+		return [make_vector(pool),sum+1]
+	end
+	def parse_expr(ary)
+		case
+		when list?(ary)
+			return parse_list(ary)
+		when num?(ary)
 			return parse_num(ary)
+		when bool?(ary)
+			return parse_bool(ary)
+		when vector?(ary)
+			return parse_vector(ary)
 		end
 		[ruby_to_SObj(nil),1]
 	end
