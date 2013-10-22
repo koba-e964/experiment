@@ -173,6 +173,16 @@ module RbScmParse
 		end
 		return [make_vector(pool),sum+1]
 	end
+	def parse_symbol_or_syntax(ary)
+		str=ary[0]
+		case
+		when ScmSymbol::valid?(str)
+			return [symbol(str),1]
+		when ScmSyntax::valid?(str)
+			return [syntax(str),1]
+		end
+		raise 'neither symbol nor syntax:'+str
+	end
 	def parse_expr(ary)
 		case
 		when list?(ary)
@@ -184,7 +194,7 @@ module RbScmParse
 		when vector?(ary)
 			return parse_vector(ary)
 		end
-		[ruby_to_SObj(nil),1]
+		return parse_symbol_or_syntax(ary)
 	end
 end # module RbScmParse
 

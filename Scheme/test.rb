@@ -55,3 +55,6 @@ p parse1
 
 parse2=parse_expr(tokenize("( #(7 8 9)#(11)#())"))
 p parse2
+
+parse3=parse_expr(token0)
+p parse3
