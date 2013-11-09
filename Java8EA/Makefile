@@ -10,3 +10,7 @@ JAVAC=$(JDKBIN)javac.exe
 	$(JDKBIN)javap.exe $*
 %.dasm:
 	$(JDKBIN)javap.exe -v $* >$*.asm
+.PHONY:clean
+clean:
+	-rm *.class
+	-rm */*.class
