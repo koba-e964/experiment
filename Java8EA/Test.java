@@ -1,5 +1,6 @@
 import java.util.function.*;
 import java.util.stream.*;
+import kobae964_lib.Sequence;
 
 public class Test{
 	public static void main(String[] args){

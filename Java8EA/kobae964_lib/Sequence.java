@@ -1,3 +1,5 @@
+package kobae964_lib;
+
 import java.util.function.*;
 import java.util.*;
 import java.util.stream.*;
