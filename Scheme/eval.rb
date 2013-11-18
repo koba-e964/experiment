@@ -43,7 +43,9 @@ module RbScmEval
 					return eval_if(cdr,local)
 				when "set!"
 					return eval_set(cdr,local)
-				when "begin","cond","and","or","case","let",
+				when "begin"
+					return eval_begin(cdr,local)
+				when "cond","and","or","case","let",
 					"let*","letrec","do","delay","quasiquote"
 					raise 'unsupported syntax'+str
 				end
@@ -119,7 +121,7 @@ module RbScmEval
 		end
 		return sobj_eval_sym(t,local)
 	end
-	#(varname expr)
+	#(varname expr), TODO FIXME this method defines variable if not defined.
 	def eval_set(cdr,local)
 		varname,expr=pair_divide(cdr)
 		expr,null=pair_divide(expr)
@@ -127,6 +129,15 @@ module RbScmEval
 		varname.type==SYMBOL or raise varname.to_s+' is not a symbol'
 		local[varname.data]=sobj_eval_sym(expr,local)
 		return make_undef()
+	end
+	#(expr...)
+	def eval_begin(cdr,local)
+		res=make_undef()
+		while cdr.type!=NULL
+			car,cdr=pair_divide(cdr)
+			res=sobj_eval_sym(car,local)
+		end
+		return res
 	end
 end
 
