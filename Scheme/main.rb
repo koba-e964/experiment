@@ -8,6 +8,7 @@ module Kind
 	SYMBOL=7
 	SYNTAX=8
 	VECTOR=9
+	UNDEF=10
 end
 
 class ScmSymbol
@@ -134,6 +135,10 @@ class SObj
 		@type=VECTOR
 		@data=val
 	end
+	def set_undef()
+		@type=UNDEF
+		@data=nil
+	end
 	def to_s()
 		if type==NULL
 			return "()"
@@ -171,6 +176,9 @@ class SObj
 				str+=' '
 			end
 			return (if(data.size==0) then '#(' else str[0...str.size-1] end)+')'
+		end
+		if type==UNDEF
+			return "#<undef>"
 		end
 		return ""
 	end
@@ -247,6 +255,11 @@ module RbScm
 	def make_syntax(name)
 		obj=SObj.new
 		obj.set_syntax(syntax(name))
+		return obj
+	end
+	def make_undef()
+		obj=SObj.new
+		obj.set_undef
 		return obj
 	end
 end

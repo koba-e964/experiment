@@ -62,3 +62,12 @@ p parse2
 
 parse3=parse_expr(token0)
 p parse3
+
+
+#eval.rb sobj_eval
+
+result0=sobj_eval(parse_expr(tokenize('(+ 1 2 3)'))[0])
+p [result0,"=6"]
+result1=sobj_eval(parse_expr(tokenize('(if (set! x 3) x 1)'))[0])
+p [result1,"=3"]
+

@@ -22,7 +22,7 @@ module RbScmEval
 		if @@map.nil?
 			@@map=SymMap.new()
 		end
-		raise unless sobj.is_a? SObj
+		raise 'not a SObj:'+sobj.inspect unless sobj.is_a? SObj
 		case sobj.type
 		when NULL
 			ret=SObj.new
@@ -104,12 +104,29 @@ module RbScmEval
 	def eval_if(cdr,local)
 		cond,t=pair_divide(cdr)
 		t,f=pair_divide(t)
-		f,null_list=pair_divide(f)
-		null_list.type==NULL or raise '(if cond then else) expected, but got:(if)+'+cdr.to_s
+		if(f.type!=NULL)
+			f,null_list=pair_divide(f)
+			null_list.type==NULL or raise '(if cond then else) expected, but got:(if)+'+cdr.to_s
+		else
+			f=nil
+		end
+		cond=sobj_eval_sym(cond,local)
 		if(cond.type==BOOL && cond.data==false)
+			if f.nil?
+				return make_undef()
+			end
 			return sobj_eval_sym(f,local)
 		end
 		return sobj_eval_sym(t,local)
+	end
+	#(varname expr)
+	def eval_set(cdr,local)
+		varname,expr=pair_divide(cdr)
+		expr,null=pair_divide(expr)
+		null.type==NULL or raise null.to_s+' is not null'
+		varname.type==SYMBOL or raise varname.to_s+' is not a symbol'
+		local[varname.data]=sobj_eval_sym(expr,local)
+		return make_undef()
 	end
 end
 
