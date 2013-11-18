@@ -67,6 +67,8 @@ module RbScmTokenize
 					cur=''
 					next
 				end
+				cur+=ch
+				ptr+=1
 				next
 			when "'"
 				ary+=[cur,"'"]
@@ -114,7 +116,8 @@ module RbScmParse
 		return ary[0]=='#t' || ary[0]=='#f'
 	end
 	def parse_bool(ary)
-		raise 'bool(#t|#f) required in:'+str unless bool?(str)
+		str=ary[0]
+		raise 'bool(#t|#f) required in:'+str unless bool?(ary)
 		return [RbScm::ruby_to_SObj(str[1]=='t'),1]
 	end
 	def num?(ary)
