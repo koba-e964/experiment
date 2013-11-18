@@ -177,9 +177,9 @@ module RbScmParse
 		str=ary[0]
 		case
 		when ScmSymbol::valid?(str)
-			return [symbol(str),1]
+			return [make_symbol(str),1]
 		when ScmSyntax::valid?(str)
-			return [syntax(str),1]
+			return [make_syntax(str),1]
 		end
 		raise 'neither symbol nor syntax:'+str
 	end

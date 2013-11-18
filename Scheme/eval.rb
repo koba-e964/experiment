@@ -32,6 +32,21 @@ module RbScmEval
 			#sobj is a list
 			car=sobj.data[0]
 			cdr=sobj.data[1]
+			if(car.type==SYNTAX)
+				str=car.data.name
+				case str
+				when "quote"
+					return pair_divide(cdr)[0]
+				when "lambda"
+					return make_pair(car,cdr)
+				when "if"
+					return eval_if(cdr,local)
+				when "set!","begin","cond","and","or","case","let",
+					"let*","letrec","do","delay","quasiquote"
+					raise 'unsupported syntax'+str
+				end
+				raise "Illegal state. Something wrong happened."
+			end
 			func=sobj_eval_sym(car,local)
 			args=[]
 			while cdr.type!=NULL
@@ -40,7 +55,7 @@ module RbScmEval
 				cdr=cdr.data[1]
 			end
 			args=ruby_to_SObj(args) #convert args from array to list
-			puts "call("+car.to_s+' => '+func.to_s+", args="+args.to_s+")"
+			#puts "call("+car.to_s+' => '+func.to_s+", args="+args.to_s+")"
 			if func.is_a? Proc
 				return func[args]
 			end
@@ -78,6 +93,10 @@ module RbScmEval
 			copy[param.data]=args
 		end
 		return sobj_eval_sym(expr,copy)
+	end
+	# ((variables...) expr)
+	def eval_lambda(cdr)
+		
 	end
 end
 

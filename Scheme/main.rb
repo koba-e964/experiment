@@ -239,4 +239,14 @@ module RbScm
 		obj.set_vector(elem)
 		return obj
 	end
+	def make_symbol(name)
+		obj=SObj.new
+		obj.set_symbol(symbol(name))
+		return obj
+	end
+	def make_syntax(name)
+		obj=SObj.new
+		obj.set_syntax(syntax(name))
+		return obj
+	end
 end
