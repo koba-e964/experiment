@@ -41,7 +41,9 @@ module RbScmEval
 					return make_pair(car,cdr)
 				when "if"
 					return eval_if(cdr,local)
-				when "set!","begin","cond","and","or","case","let",
+				when "set!"
+					return eval_set(cdr,local)
+				when "begin","cond","and","or","case","let",
 					"let*","letrec","do","delay","quasiquote"
 					raise 'unsupported syntax'+str
 				end
@@ -71,6 +73,10 @@ module RbScmEval
 				raise "symbol '"+sobj.to_s+"' not found"
 			end
 			return res
+		when SYNTAX
+			return sobj.clone
+		when BOOL
+			return sobj.clone
 		end
 		raise Exception
 	end
@@ -94,9 +100,16 @@ module RbScmEval
 		end
 		return sobj_eval_sym(expr,copy)
 	end
-	# ((variables...) expr)
-	def eval_lambda(cdr)
-		
+	# (cond then else)
+	def eval_if(cdr,local)
+		cond,t=pair_divide(cdr)
+		t,f=pair_divide(t)
+		f,null_list=pair_divide(f)
+		null_list.type==NULL or raise '(if cond then else) expected, but got:(if)+'+cdr.to_s
+		if(cond.type==BOOL && cond.data==false)
+			return sobj_eval_sym(f,local)
+		end
+		return sobj_eval_sym(t,local)
 	end
 end
 
