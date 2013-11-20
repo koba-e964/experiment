@@ -63,6 +63,9 @@ p parse2
 parse3=parse_expr(token0)
 p parse3
 
+parse4=parse_expr(tokenize("(2 3 4 . 5)"))
+p parse4
+
 
 #eval.rb sobj_eval
 

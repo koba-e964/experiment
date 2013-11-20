@@ -148,9 +148,9 @@ module RbScmParse
 		pool=[]
 		while(sum<ary.size() && ary[sum]!=')')
 			if(ary[sum]=='.') #improper list
-				sobj,ind=parse_expr(ary[sum...ary.size])
-				if(ary[sum+ind]!=')')
-					raise 'invalid improper list:'+ary.inspectz
+				sobj,ind=parse_expr(ary[sum+1...ary.size])
+				if(ary[sum+ind+1]!=')')
+					raise 'invalid improper list:'+ary.inspect
 				end
 				pool[pool.size-1]=make_pair(pool[pool.size-1], sobj)
 				sum+=ind
