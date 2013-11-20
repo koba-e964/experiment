@@ -119,7 +119,7 @@ module RbScmEval
 			f=nil
 		end
 		cond=sobj_eval_sym(cond,local)
-		if(cond.type==BOOL && cond.data==false)
+		if(scm_false?(cond))
 			if f.nil?
 				return make_undef()
 			end
@@ -151,7 +151,7 @@ module RbScmEval
 			car,cdr=pair_divide(cdr)
 			cond,expr=pair_divide(car)
 			b=sobj_eval_sym(cond,local)
-			if(b.type!=BOOL || b.data)
+			if(scm_true?(b))
 				if(expr.type==NULL) #(cond (b))
 					return b
 				end
