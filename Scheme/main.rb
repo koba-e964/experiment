@@ -276,4 +276,10 @@ module RbScm
 		obj.set_undef
 		return obj
 	end
+	def scm_true?(sobj)
+		sobj.type!=BOOL || sobj.data
+	end
+	def scm_false?(sobj)
+		sobj.type==BOOL && !sobj.data
+	end
 end

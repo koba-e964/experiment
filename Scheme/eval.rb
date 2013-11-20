@@ -47,7 +47,11 @@ module RbScmEval
 					return eval_begin(cdr,local)
 				when "cond"
 					return eval_cond(cdr,local)
-				when "and","or","case","let",
+				when "and"
+					return eval_and(cdr,local)
+				when "or"
+					return eval_or(cdr,local)
+				when "case","let",
 					"let*","letrec","do","delay","quasiquote"
 					raise 'unsupported syntax'+str
 				end
@@ -165,6 +169,24 @@ module RbScmEval
 			end
 		end
 		return make_undef()
+	end
+	#(expr...)
+	def eval_and(cdr,local)
+		res=ruby_to_SObj(true)
+		while scm_true?(res) && cdr.type!=NULL
+			car,cdr=pair_divide(cdr)
+			res=sobj_eval_sym(car,local)
+		end
+		return res
+	end
+	#(expr...)
+	def eval_or(cdr,local)
+		res=ruby_to_SObj(false)
+		while scm_false?(res) && cdr.type!=NULL
+			car,cdr=pair_divide(cdr)
+			res=sobj_eval_sym(car,local)
+		end
+		return res
 	end
 end
 

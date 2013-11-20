@@ -66,6 +66,10 @@ p parse3
 
 #eval.rb sobj_eval
 
+def run(str)
+	sobj_eval(parse_expr(tokenize(str))[0])
+end
+
 result0=sobj_eval(parse_expr(tokenize('(+ 1 2 3)'))[0])
 p [result0,"=6"]
 result1=sobj_eval(parse_expr(tokenize('(if (set! x 3) x 1)'))[0])
@@ -73,3 +77,10 @@ p [result1,"=3"]
 
 result2=sobj_eval(parse_expr(tokenize('(cond ((quote (1 3)) => (lambda (x) x)))'))[0])
 p [result2,"=(1 3)"]
+
+#and or
+
+result3=run('(and #t 2 3 4 5)')
+p [result3,'=5']
+result4=run('(or #f ((lambda (x) x) #f) #f)')
+p [result4,'=#f']
