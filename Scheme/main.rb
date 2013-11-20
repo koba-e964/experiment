@@ -237,9 +237,23 @@ module RbScm
 			return obj
 		end
 	end
+	def make_null()
+		obj=SObj.new()
+		obj.set_null
+		return obj
+	end
 	def make_pair(car,cdr)
 		obj=SObj.new()
 		obj.set_pair(car,cdr)
+		return obj
+	end
+	def make_list(ary)
+		obj=SObj.new()
+		if(ary.size()==0)
+			obj.set_null()
+		else
+			obj.set_pair(ary[0], make_list(ary[1..ary.size-1]))
+		end
 		return obj
 	end
 	def make_vector(elem)

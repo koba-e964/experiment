@@ -45,7 +45,9 @@ module RbScmEval
 					return eval_set(cdr,local)
 				when "begin"
 					return eval_begin(cdr,local)
-				when "cond","and","or","case","let",
+				when "cond"
+					return eval_cond(cdr,local)
+				when "and","or","case","let",
 					"let*","letrec","do","delay","quasiquote"
 					raise 'unsupported syntax'+str
 				end
@@ -138,6 +140,31 @@ module RbScmEval
 			res=sobj_eval_sym(car,local)
 		end
 		return res
+	end
+	#((condition expr)...)
+	def eval_cond(cdr,local)
+		while cdr.type!=NULL
+			car,cdr=pair_divide(cdr)
+			cond,expr=pair_divide(car)
+			b=sobj_eval_sym(cond,local)
+			if(b.type!=BOOL || b.data)
+				if(expr.type==NULL) #(cond (b))
+					return b
+				end
+				t,_=pair_divide(expr) # t might be '=>'
+				if(t.type==SYMBOL && t.data.name=='=>')
+					_,expr=pair_divide(expr)
+					expr,null=pair_divide(expr)
+					null.type==NULL or raise null.inspect+' is not null'
+					res=sobj_eval_sym(expr,local)
+					return sobj_eval_sym(
+						make_list([expr,make_list([make_syntax('quote'),b])]),local
+					)
+				end
+				return eval_begin(expr,local)
+			end
+		end
+		return make_undef()
 	end
 end
 

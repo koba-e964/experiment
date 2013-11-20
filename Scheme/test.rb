@@ -71,3 +71,5 @@ p [result0,"=6"]
 result1=sobj_eval(parse_expr(tokenize('(if (set! x 3) x 1)'))[0])
 p [result1,"=3"]
 
+result2=sobj_eval(parse_expr(tokenize('(cond ((quote (1 3)) => (lambda (x) x)))'))[0])
+p [result2,"=(1 3)"]
