@@ -224,6 +224,16 @@ end
 module RbScmEval
 	module_function
 	extend RbScm
+	def check_argc(arglist,num)
+		cnt=0
+		old=arglist
+		while arglist.type==PAIR
+			_,arglist=pair_divide(arglist)
+			cnt+=1
+		end
+		arglist.type==NULL or raise 'proper list required for arguments of function:'+old.to_s
+		cnt==num or raise 'wrong number of arguments:requirement='+num.to_s+' but received='+old.to_s
+	end
 	def add_initial_operator()
 		if @@map.nil?
 			@@map=SymMap.new()
@@ -259,6 +269,12 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
+		})
+		define_global(symbol('null?'),lambda{|varargs| #argument length must be 1
+			check_argc(varargs,1)
+			car,null_list=pair_divide(varargs)
+			null_list.type==NULL or raise
+			return ruby_to_SObj(car.type==NULL)
 		})
 	end
 end
