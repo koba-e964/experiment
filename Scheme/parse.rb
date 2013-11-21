@@ -146,21 +146,36 @@ module RbScmParse
 		raise 'not list' unless list?(ary)
 		sum=1
 		pool=[]
-		while(sum<ary.size() && ary[sum]!=')')
+		fin=false
+		acc=nil #returned list
+		while(sum<ary.size())
 			if(ary[sum]=='.') #improper list
 				sobj,ind=parse_expr(ary[sum+1...ary.size])
 				if(ary[sum+ind+1]!=')')
 					raise 'invalid improper list:'+ary.inspect
 				end
-				pool[pool.size-1]=make_pair(pool[pool.size-1], sobj)
-				sum+=ind
+				acc=sobj
+				sum+=ind+1
+				fin=true
+				break
+			end
+			if(ary[sum]==')')
+				fin=true
+				sum+=1
+				acc=make_null
 				break
 			end
 			sobj,ind=parse_expr(ary[sum...ary.size])
 			pool+=[sobj]
 			sum+=ind
 		end
-		return [ruby_to_SObj(pool),sum+1]
+		fin or raise 'invalid list, ")" not found:'+ary.inspect
+		i=pool.size-1
+		while i>=0
+			acc=make_pair(pool[i],acc)
+			i-=1
+		end
+		return [acc,sum]
 	end
 	def vector?(ary)
 		return ary[0]=='#('
