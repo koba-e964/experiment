@@ -120,22 +120,39 @@ module RbScmParse
 		raise 'bool(#t|#f) required in:'+str unless bool?(ary)
 		return [RbScm::ruby_to_SObj(str[1]=='t'),1]
 	end
+	#checks if ary[0] is an integral literal. This method doesn't support floating-point numbers.
 	def num?(ary)
-		#only decimal integers are admitted. TODO FIXME
-		s="0123456789"
+		s="0123456789abcdef"
+		radix=10 #default
 		str=ary[0]
+		if(str[0]=='#') #radix prefix
+			radix={'b'=>2,'o'=>8,'d'=>10,'x'=>16}[str[1]]
+			return false if radix.nil?
+			str=str[2...str.size]
+		end
+		s=s[0...radix] #digits must be less than radix
 		for ch in str.chars.map{|v|v}
+			ch.downcase!
 			return false if s.index(ch).nil?
 		end
 		return true
 	end
-	def parse_num(ary)
-		raise 'not a decimal int' unless num?(ary)
+	def parse_num(ary) #ary is an array
+		raise 'not an int' unless num?(ary)
+		s="0123456789abcdef"
 		sum=0
+		radix=10 #default
 		str=ary[0]
+		if(str[0]=='#') #radix prefix
+			radix={'b'=>2,'o'=>8,'d'=>10,'x'=>16}[str[1]]
+			radix.nil? and raise 'invalid numeric:'+str
+			str=str[2...str.size]
+		end
+		s=s[0...radix] #digits must be less than radix
 		for ch in str.chars.map{|v|v}
-			n=ch.ord-48
-			sum=10*sum+n
+			ch.downcase!
+			n=s.index(ch)
+			sum=radix*sum+n
 		end
 		return [ruby_to_SObj(sum),1]
 	end

@@ -87,3 +87,7 @@ result3=run('(and #t 2 3 4 5)')
 p [result3,'=5']
 result4=run('(or #f ((lambda (x) x) #f) #f)')
 p [result4,'=#f']
+
+#6.2.4 numerical constants
+result5=run('(quote (#b1010 #o777 #d10000 #xffff))')
+p [result5,[10,0777,10000,0xffff]]
