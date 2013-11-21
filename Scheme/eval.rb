@@ -284,6 +284,18 @@ module RbScmEval
 			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
 		})
+		define_global(symbol('*'),lambda{|varargs| #argument is passed as a list
+			sum=1
+			while varargs.type==PAIR
+				car=varargs.data[0]
+				cdr=varargs.data[1]
+				raise car.to_s+' is not an int' unless car.type==INT
+				sum*=car.data
+				varargs=cdr
+			end
+			raise 'the terminal of list must be ()' unless varargs.type==NULL
+			return ruby_to_SObj(sum)
+		})
 		define_global(symbol('null?'),lambda{|varargs| #argument length must be 1
 			check_argc(varargs,1)
 			car,null_list=pair_divide(varargs)

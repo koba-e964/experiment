@@ -91,3 +91,10 @@ p [result4,'=#f']
 #6.2.4 numerical constants
 result5=run('(quote (#b1010 #o777 #d10000 #xffff))')
 p [result5,[10,0777,10000,0xffff]]
+
+
+#6.2.5 numerical operations
+
+result6=run('(* 3 7 5 6 4)')
+p [result6,3*7*5*6*4]
+
