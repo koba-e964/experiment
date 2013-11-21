@@ -130,6 +130,10 @@ module RbScmParse
 			return false if radix.nil?
 			str=str[2...str.size]
 		end
+		if(str[0]=='-'||str[0]=='+') #signum
+			str=str[1...str.size] #single '+'/'-' was allowed
+		end
+		str.size!=0 or return false #literal has at lease one digit
 		s=s[0...radix] #digits must be less than radix
 		for ch in str.chars.map{|v|v}
 			ch.downcase!
@@ -143,10 +147,17 @@ module RbScmParse
 		sum=0
 		radix=10 #default
 		str=ary[0]
+		sgn=1
 		if(str[0]=='#') #radix prefix
 			radix={'b'=>2,'o'=>8,'d'=>10,'x'=>16}[str[1]]
 			radix.nil? and raise 'invalid numeric:'+str
 			str=str[2...str.size]
+		end
+		if(str[0]=='-'||str[0]=='+') #signum
+			if(str[0]=='-')
+				sgn=-1
+			end
+			str=str[1...str.size] #single '+'/'-' was allowed
 		end
 		s=s[0...radix] #digits must be less than radix
 		for ch in str.chars.map{|v|v}
@@ -154,7 +165,7 @@ module RbScmParse
 			n=s.index(ch)
 			sum=radix*sum+n
 		end
-		return [ruby_to_SObj(sum),1]
+		return [ruby_to_SObj(sum*sgn),1]
 	end
 	def list?(ary)
 		ary[0]=='('

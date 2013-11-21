@@ -92,6 +92,8 @@ p [result4,'=#f']
 result5=run('(quote (#b1010 #o777 #d10000 #xffff))')
 p [result5,[10,0777,10000,0xffff]]
 
+result5_1=run('(quote (-100 #x-ffff))')
+p [result5_1,[-100,-0xffff]]
 
 #6.2.5 numerical operations
 
