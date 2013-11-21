@@ -13,8 +13,7 @@ end
 
 class ScmSymbol
 	attr_accessor :name
-	@@syntaxes=["quote","lambda","if","set!","begin","cond","and","or","case","let",
-		"let*","letrec","do","delay","quasiquote"]
+	@@syntaxes=["define","define-syntax","quote","lambda","if","set!","begin","cond","and","or","case","let","let*","letrec","do","delay","quasiquote"]
 	@@charset=('0'.upto('9').reduce(:+))+('A'.upto('Z').reduce(:+))+('a'.upto('z').reduce(:+))
 	@@charset+="!$%&*+-./:<=>?@^_~"
 	@@initial=@@charset.clone.delete('0'.upto('9').reduce(:+))
@@ -51,7 +50,7 @@ class ScmSymbol
 end
 class ScmSyntax
 	attr_accessor :name
-	@@syntaxes=["quote","lambda","if","set!","begin","cond","and","or","case","let",
+	@@syntaxes=["define","define-syntax","quote","lambda","if","set!","begin","cond","and","or","case","let",
 		"let*","letrec","do","delay","quasiquote"]
 	def self.syntax()
 		@@syntaxes
@@ -73,7 +72,7 @@ class ScmSyntax
 		return 0x33c0fb18^@name.hash
 	end
 	def to_s
-		@name
+		'syntax:'+@name
 	end
 	def inspect
 		"["+to_s+"]"
@@ -167,7 +166,7 @@ class SObj
 			return (if data then "#t" else "#f" end)
 		end
 		if type==SYMBOL || type==SYNTAX
-			return data.name
+			return data.to_s
 		end
 		if type==VECTOR
 			str='#('

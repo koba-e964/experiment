@@ -35,6 +35,10 @@ module RbScmEval
 			if(car.type==SYNTAX)
 				str=car.data.name
 				case str
+				when "define"
+					return eval_define(cdr,local)
+				when "define-syntax"
+					raise 'unsupported'
 				when "quote"
 					return pair_divide(cdr)[0]
 				when "lambda"
@@ -107,6 +111,16 @@ module RbScmEval
 			copy[param.data]=args
 		end
 		return sobj_eval_sym(expr,copy)
+	end
+	#(varname expr)
+	def eval_define(cdr,local) #TODO this method doesn't support (define (func args...) expr)
+		check_argc(cdr,2)
+		varname,expr=pair_divide(cdr)
+		expr,_=pair_divide(expr)
+		v=sobj_eval_sym(expr,local)
+		varname.type==SYMBOL or raise 'not symbol:'+varname.to_s
+		define_global(varname.data,v)
+		return varname
 	end
 	# (cond then else)
 	def eval_if(cdr,local)
