@@ -11,6 +11,12 @@ puts "sobj0.to_s="+sobj0.to_s
 
 #test of sobj_eval
 
+#initialization
+include RbScmEval
+gl_map=SymMap.new()
+set_global_map(gl_map)
+add_initial_operator(gl_map)
+
 include RbScmEval
 
 sexp0=ruby_to_SObj([symbol('+'),1,2,[symbol('+'),100]])

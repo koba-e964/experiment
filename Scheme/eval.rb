@@ -4,8 +4,12 @@ module RbScmEval
 	include Kind
 	extend RbScm
 	include RbScm
+	
 	@@map=nil
 	module_function
+	def set_global_map(map)
+		@@map=map
+	end
 	def pair_divide(sobj)
 		if sobj.type!=PAIR
 			raise 'sobj must be a pair, given:'+sobj.to_s
@@ -233,6 +237,18 @@ class SymMap #map: ScmSymbol->(SObj or Proc)
 		raise unless sym.is_a? ScmSymbol
 		@map.delete(sym)
 	end
+	def to_s
+		str=''
+		for entry in @map
+			str+=entry[0].to_s+' ===> '+
+			(if entry[1].is_a?(Proc) then 'Proc' else entry[1].to_s end)+
+			"\n"
+		end
+		return str
+	end
+	def inspect
+		"SymMap:\n"+to_s
+	end
 end
 
 module RbScmEval
@@ -248,11 +264,8 @@ module RbScmEval
 		arglist.type==NULL or raise 'proper list required for arguments of function:'+old.to_s
 		(if vararg then cnt>=num else cnt==num end) or raise 'wrong number of arguments:requirement='+num.to_s+' but received='+old.to_s
 	end
-	def add_initial_operator()
-		if @@map.nil?
-			@@map=SymMap.new()
-		end
-		define_global(symbol('+'),lambda{|varargs| #argument is passed as a list
+	def add_initial_operator(map)
+		map[symbol('+')]=lambda{|varargs| #argument is passed as a list
 			sum=0
 			while varargs.type==PAIR
 				car=varargs.data[0]
@@ -263,8 +276,8 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless varargs.type==NULL
 			return ruby_to_SObj(sum)
-		})
-		define_global(symbol('-'),lambda{|varargs| #argument is passed as a list
+		}
+		map[symbol('-')]=lambda{|varargs| #argument is passed as a list
 			#(>= (length varargs) 1)
 			check_argc(varargs,1,true)
 			sum=0
@@ -281,8 +294,8 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
-		})
-		define_global(symbol('*'),lambda{|varargs| #argument is passed as a list
+		}
+		map[symbol('*')]=lambda{|varargs| #argument is passed as a list
 			sum=1
 			while varargs.type==PAIR
 				car=varargs.data[0]
@@ -293,23 +306,23 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless varargs.type==NULL
 			return ruby_to_SObj(sum)
-		})
-		define_global(symbol('null?'),lambda{|varargs|
+		}
+		map[symbol('null?')]=lambda{|varargs|
 			check_argc(varargs,1) #argument length must be 1
 			car,_=pair_divide(varargs)
 			return ruby_to_SObj(car.type==NULL)
-		})
-		define_global(symbol('number?'),lambda{|varargs|
+		}
+		map[symbol('number?')]=lambda{|varargs|
 			check_argc(varargs,1) #argument length must be 1
 			car,_=pair_divide(varargs)
 			return ruby_to_SObj(car.type==INT) #only int is supported
-		})
-		define_global(symbol('integer?'),lambda{|varargs|
+		}
+		map[symbol('integer?')]=lambda{|varargs|
 			check_argc(varargs,1) #argument length must be 1
 			car,_=pair_divide(varargs)
 			return ruby_to_SObj(car.type==INT)
-		})
-		define_global(symbol('<'),lambda{|varargs| #argument is passed as a list
+		}
+		map[symbol('<')]=lambda{|varargs| #argument is passed as a list
 			check_argc(varargs,2,true) # argc>=2
 			res=true
 			cur=nil
@@ -322,7 +335,6 @@ module RbScmEval
 				varargs=cdr
 			end
 			return ruby_to_SObj(res)
-		})
+		}
 	end
 end
-RbScmEval::add_initial_operator()
