@@ -100,3 +100,17 @@ p [result5_1,[-100,-0xffff]]
 result6=run('(* 3 7 5 6 4)')
 p [result6,3*7*5*6*4]
 
+result7=run('(< 2 3 4 5)')
+p [result7, "#t"]
+
+result8=run('(< -2 6 4 5)')
+p [result8, "#f"]
+
+result9=run('(integer? (quote (1 2 3)))')
+p [result9,"#f"]
+
+
+result10=run('(integer? (+ 1 2 3))')
+p [result10,"#t"]
+
+

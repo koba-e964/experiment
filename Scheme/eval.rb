@@ -238,7 +238,7 @@ end
 module RbScmEval
 	module_function
 	extend RbScm
-	def check_argc(arglist,num)
+	def check_argc(arglist,num,vararg=false)
 		cnt=0
 		old=arglist
 		while arglist.type==PAIR
@@ -246,7 +246,7 @@ module RbScmEval
 			cnt+=1
 		end
 		arglist.type==NULL or raise 'proper list required for arguments of function:'+old.to_s
-		cnt==num or raise 'wrong number of arguments:requirement='+num.to_s+' but received='+old.to_s
+		(if vararg then cnt>=num else cnt==num end) or raise 'wrong number of arguments:requirement='+num.to_s+' but received='+old.to_s
 	end
 	def add_initial_operator()
 		if @@map.nil?
@@ -266,10 +266,8 @@ module RbScmEval
 		})
 		define_global(symbol('-'),lambda{|varargs| #argument is passed as a list
 			#(>= (length varargs) 1)
+			check_argc(varargs,1,true)
 			sum=0
-			if(varargs.type==NULL)
-				raise '- requires at least 1 argument'
-			end
 			car,cdr=pair_divide(varargs)
 			raise 'int required, but given:'+car.to_s unless car.type==INT
 			if(cdr.type==NULL)
@@ -296,11 +294,34 @@ module RbScmEval
 			raise 'the terminal of list must be ()' unless varargs.type==NULL
 			return ruby_to_SObj(sum)
 		})
-		define_global(symbol('null?'),lambda{|varargs| #argument length must be 1
-			check_argc(varargs,1)
-			car,null_list=pair_divide(varargs)
-			null_list.type==NULL or raise
+		define_global(symbol('null?'),lambda{|varargs|
+			check_argc(varargs,1) #argument length must be 1
+			car,_=pair_divide(varargs)
 			return ruby_to_SObj(car.type==NULL)
+		})
+		define_global(symbol('number?'),lambda{|varargs|
+			check_argc(varargs,1) #argument length must be 1
+			car,_=pair_divide(varargs)
+			return ruby_to_SObj(car.type==INT) #only int is supported
+		})
+		define_global(symbol('integer?'),lambda{|varargs|
+			check_argc(varargs,1) #argument length must be 1
+			car,_=pair_divide(varargs)
+			return ruby_to_SObj(car.type==INT)
+		})
+		define_global(symbol('<'),lambda{|varargs| #argument is passed as a list
+			check_argc(varargs,2,true) # argc>=2
+			res=true
+			cur=nil
+			while varargs.type==PAIR
+				car=varargs.data[0]
+				cdr=varargs.data[1]
+				raise car.to_s+' is not an int' unless car.type==INT
+				res&=(cur.nil? || cur<car.data)
+				cur=car.data
+				varargs=cdr
+			end
+			return ruby_to_SObj(res)
 		})
 	end
 end
