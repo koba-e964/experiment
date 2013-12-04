@@ -183,7 +183,7 @@ module RbScmParse
 					raise 'invalid improper list:'+ary.inspect
 				end
 				acc=sobj
-				sum+=ind+1
+				sum+=ind+2
 				fin=true
 				break
 			end

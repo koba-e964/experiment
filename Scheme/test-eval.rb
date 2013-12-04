@@ -28,6 +28,7 @@ def run(str)
 	pos=0
 	res=nil
 	while(pos<tokens.size)
+		p [pos,tokens.size,tokens[pos...tokens.size]]
 		sobj,len=parse_expr(tokens[pos...tokens.size])
 		res=sobj_eval(sobj)
 		pos+=len
@@ -79,14 +80,20 @@ p [result10,"#t"]
 result11=run('(define a 2) ((lambda (a) a)8) a')
 p [result11,2]
 
+#improper list
+result=run('(define imp-list-0 (quote (2 . 4))) imp-list-0')
+p [result,[2,'.',4]]
+
 
 #lib.txt
 def read_file(filename)
+	str=''
 	fp=open(filename,'r')
 	for line in fp
-		run(line)
+		str+=line
 	end
 	fp.close
+	run(str)
 	nil
 end
 read_file('lib.txt')
