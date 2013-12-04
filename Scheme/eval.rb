@@ -46,7 +46,7 @@ module RbScmEval
 				when "quote"
 					return pair_divide(cdr)[0]
 				when "lambda"
-					return make_pair(car,cdr)
+					return make_lambda(cdr,local)
 				when "if"
 					return eval_if(cdr,local)
 				when "set!"
@@ -77,7 +77,10 @@ module RbScmEval
 			if func.is_a? Proc
 				return func[args]
 			end
-			return apply_lambda(func,args,local)
+			if func.is_a? LambdaClosure
+				return func[args]
+			end
+			raise 'neiter Proc nor LambdaClosure'
 		when INT
 			return sobj.clone
 		when SYMBOL
@@ -96,25 +99,14 @@ module RbScmEval
 		end
 		raise Exception
 	end
-	def apply_lambda(lmd,args,local)
-		aa,param=pair_divide(lmd)
-		raise 'not lambda' unless aa.type==SYNTAX && aa.data==syntax('lambda')
-		param,expr=pair_divide(param)
-		expr,null_list=pair_divide(expr)
-		raise 'too many arguments(required:3):'+null_list.to_s unless null_list.type==NULL
-		copy=local.copy
-		while(param.type==PAIR)
-			pn,param=pair_divide(param)
-			#pn<-args[?]
-			raise 'too few argument param='+pn.to_s unless args.type==PAIR
-			val,args=pair_divide(args)
-			copy[pn.data]=val #overwrite if already defined
-		end
-		if(param.type!=NULL)
-			# param is symbol (rest parameter)
-			copy[param.data]=args
-		end
-		return sobj_eval_sym(expr,copy)
+	def make_lambda(cdr,local)
+		check_argc(cdr,2,true) #(param expr...)
+		param,exprs=pair_divide(cdr)
+		inst=LambdaClosure.new(param,exprs,local)
+		return inst
+		ret=SObj.new
+		ret.set_lambda(inst)
+		return ret
 	end
 	#(varname expr)
 	def eval_define(cdr,local) #TODO this method doesn't support (define (func args...) expr)
@@ -222,7 +214,7 @@ class SymMap #map: ScmSymbol->(SObj or Proc)
 	end
 	def []=(sym,obj) #assign nil to clear
 		raise 'not a symbol:'+sym.inspect unless sym.is_a?(ScmSymbol)
-		raise unless obj.is_a?(SObj)||obj.is_a?(Proc)||obj.nil?
+		raise unless obj.is_a?(SObj)||obj.is_a?(Proc)||obj.is_a?(LambdaClosure) || obj.nil?
 		@map[sym]=obj
 	end
 	def [](sym)
@@ -256,6 +248,37 @@ class SymMap #map: ScmSymbol->(SObj or Proc)
 			inst[s]=v
 		end
 		return inst
+	end
+end
+class LambdaClosure
+	attr_reader :param,:exprs, :env
+	def initialize(param,exprs,env)
+		@param=param
+		@exprs=exprs
+		@env=env
+	end
+	def [](args) #evaluation
+		copy=env.copy
+		pr=param
+		while(pr.type==PAIR)
+			pn,pr=pair_divide(pr)
+			#pn<-args[?]
+			raise 'too few argument param='+pn.to_s unless args.type==PAIR
+			val,args=pair_divide(args)
+			copy[pn.data]=val #overwrite if already defined
+		end
+		if(pr.type!=NULL)
+			# pr is symbol (rest parameter)
+			pr.type==SYMBOL or raise 'not symbol:'+pr.inspect
+			copy[pr.data]=args
+		end
+		return eval_begin(exprs,copy)
+	end
+	def to_s
+		return "#<closure >"
+	end
+	def inspect
+		return to_s
 	end
 end
 

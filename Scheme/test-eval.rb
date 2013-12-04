@@ -28,7 +28,7 @@ def run(str)
 	pos=0
 	res=nil
 	while(pos<tokens.size)
-		p [pos,tokens.size,tokens[pos...tokens.size]]
+		#p [pos,tokens.size,tokens[pos...tokens.size]]
 		sobj,len=parse_expr(tokens[pos...tokens.size])
 		res=sobj_eval(sobj)
 		pos+=len
@@ -100,4 +100,27 @@ read_file('lib.txt')
 
 result12=run('(+ (abs 3) (abs -100000))')
 p [result12,3+100000]
+
+#env test
+
+result13=run(<<EOS)
+(define xx 4)
+((lambda (zz) (+ xx zz)) 6)
+EOS
+p [result13, 10]
+
+result14=run(<<EOS)
+(define xx 4)
+(define f14 (lambda (zz) (+ xx zz)))
+(begin (set! xx 10) (f14 6))
+EOS
+p [result14, 10]
+
+result15=run(<<EOS)
+(define xx 4)
+(define f14 (lambda (zz) (+ xx zz)))
+(define xx 10)
+(f14 6)
+EOS
+p [result15, 16]
 
