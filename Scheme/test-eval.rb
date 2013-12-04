@@ -67,4 +67,9 @@ p [result9,"#f"]
 result10=run('(integer? (+ 1 2 3))')
 p [result10,"#t"]
 
+#environment
+run('(define a 2)')
+run('((lambda (a) a)8)')
+result11=run('a')
+p [result11,2]
 

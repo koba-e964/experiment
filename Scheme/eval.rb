@@ -102,13 +102,13 @@ module RbScmEval
 		param,expr=pair_divide(param)
 		expr,null_list=pair_divide(expr)
 		raise 'too many arguments(required:3):'+null_list.to_s unless null_list.type==NULL
-		copy=local.clone
+		copy=local.copy
 		while(param.type==PAIR)
 			pn,param=pair_divide(param)
 			#pn<-args[?]
 			raise 'too few argument param='+pn.to_s unless args.type==PAIR
 			val,args=pair_divide(args)
-			copy.add pn.data,val
+			copy[pn.data]=val #overwrite if already defined
 		end
 		if(param.type!=NULL)
 			# param is symbol (rest parameter)
@@ -248,6 +248,14 @@ class SymMap #map: ScmSymbol->(SObj or Proc)
 	end
 	def inspect
 		"SymMap:\n"+to_s
+	end
+	#copies this symmap. Returned instance has no relation with this.
+	def copy
+		inst=SymMap.new()
+		for s,v in @map
+			inst[s]=v
+		end
+		return inst
 	end
 end
 
