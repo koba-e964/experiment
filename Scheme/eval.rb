@@ -200,7 +200,7 @@ module RbScmEval
 	end
 end
 
-class SymMap #map: ScmSymbol->(SObj or Proc)
+class SymMap #map: ScmSymbol->(SObj or Proc or LambdaClosure)
 	def initialize()
 		@map={} #map
 	end
