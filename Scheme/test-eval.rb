@@ -24,7 +24,15 @@ p sobj_eval(sexp1)
 #eval.rb sobj_eval
 
 def run(str)
-	sobj_eval(parse_expr(tokenize(str))[0])
+	tokens=tokenize(str)
+	pos=0
+	res=nil
+	while(pos<tokens.size)
+		sobj,len=parse_expr(tokens[pos...tokens.size])
+		res=sobj_eval(sobj)
+		pos+=len
+	end
+	return res
 end
 
 result0=sobj_eval(parse_expr(tokenize('(+ 1 2 3)'))[0])
@@ -68,8 +76,21 @@ result10=run('(integer? (+ 1 2 3))')
 p [result10,"#t"]
 
 #environment
-run('(define a 2)')
-run('((lambda (a) a)8)')
-result11=run('a')
+result11=run('(define a 2) ((lambda (a) a)8) a')
 p [result11,2]
+
+
+#lib.txt
+def read_file(filename)
+	fp=open(filename,'r')
+	for line in fp
+		run(line)
+	end
+	fp.close
+	nil
+end
+read_file('lib.txt')
+
+result12=run('(+ (abs 3) (abs -100000))')
+p [result12,3+100000]
 
