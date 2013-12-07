@@ -2,3 +2,11 @@
 	(lambda (x) (if (< x 0) (- x) x)
 	)
 )
+(define list
+	(lambda varargs varargs)
+)
+(define zero? (lambda (x) (= x 0)))
+(define positive? (lambda (x) (> x 0)))
+(define negative? (lambda (x) (< x 0)))
+(define odd? (lambda (x) (= 1 (modulo x 2))))
+(define even? (lambda (x) (= 0 (modulo x 2))))

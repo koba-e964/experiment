@@ -63,12 +63,6 @@ p [result5_1,[-100,-0xffff]]
 result6=run('(* 3 7 5 6 4)')
 p [result6,3*7*5*6*4]
 
-result7=run('(< 2 3 4 5)')
-p [result7, "#t"]
-
-result8=run('(< -2 6 4 5)')
-p [result8, "#f"]
-
 result9=run('(integer? (quote (1 2 3)))')
 p [result9,"#f"]
 
@@ -123,4 +117,35 @@ result15=run(<<EOS)
 (f14 6)
 EOS
 p [result15, 16]
+
+puts "-----division:"
+
+result=run('(list (quotient 59 7) (quotient -37 13) (quotient 43 -19) (quotient -23 -17))')
+p [result,[8,-2,-2,1]]
+result=run('(list (remainder 59 7) (remainder -37 13) (remainder 43 -19) (remainder -23 -17))')
+p [result,[3,-11,5,-6]]
+result=run('(list (modulo 59 7) (modulo -37 13) (modulo 43 -19) (modulo -23 -17))')
+p [result,[3,2,-14,-6]]
+
+puts "-----division end"
+puts "-----number theoretic:"
+p [run('(list (zero? 7) (zero? 0))'),[false,true]]
+p [run('(list (positive? 7) (positive? 0))'),[true,false]]
+p [run('(list (negative? 7) (negative? 0))'),[false,false]]
+p [run('(list (even? 7) (even? -4))'),[false,true]]
+p [run('(list (odd? -7) (odd? 6))'),[true,false]]
+
+puts "-----number theoretic end"
+puts "-----comparison:"
+p [run('(< 2 3 4 5)'), "#t"]
+p [run('(< -2 6 4 5)'), "#f"]
+p [run('(= 2 2 2 2)'), "#t"]
+p [run('(= 2 1 1 1)'), "#f"]
+p [run('(> 2 1 0 -1)'), "#t"]
+p [run('(> 2 1 7 5)'), "#f"]
+p [run('(<= 2 2 2 2)'), "#t"]
+p [run('(<= 2 1 1 1)'), "#f"]
+p [run('(>= 2 1 0 -1)'), "#t"]
+p [run('(>= 2 1 7 5)'), "#f"]
+puts "-----comparison end"
 

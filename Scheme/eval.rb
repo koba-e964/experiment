@@ -358,14 +358,109 @@ module RbScmEval
 			res=true
 			cur=nil
 			while varargs.type==PAIR
-				car=varargs.data[0]
-				cdr=varargs.data[1]
+				car,cdr=pair_divide(varargs)
 				raise car.to_s+' is not an int' unless car.type==INT
-				res&=(cur.nil? || cur<car.data)
+				res=res && (cur.nil? || cur<car.data)
 				cur=car.data
 				varargs=cdr
 			end
 			return ruby_to_SObj(res)
+		}
+		map[symbol('=')]=lambda{|varargs| #argument is passed as a list
+			check_argc(varargs,2,true) # argc>=2
+			res=true
+			cur=nil
+			while varargs.type==PAIR
+				car,cdr=pair_divide(varargs)
+				raise car.to_s+' is not an int' unless car.type==INT
+				res=res && (cur.nil? || cur==car.data)
+				cur=car.data
+				varargs=cdr
+			end
+			return ruby_to_SObj(res)
+		}
+		map[symbol('>')]=lambda{|varargs| #argument is passed as a list
+			check_argc(varargs,2,true) # argc>=2
+			res=true
+			cur=nil
+			while varargs.type==PAIR
+				car,cdr=pair_divide(varargs)
+				raise car.to_s+' is not an int' unless car.type==INT
+				res=res && (cur.nil? || cur>car.data)
+				cur=car.data
+				varargs=cdr
+			end
+			return ruby_to_SObj(res)
+		}
+		map[symbol('<=')]=lambda{|varargs| #argument is passed as a list
+			check_argc(varargs,2,true) # argc>=2
+			res=true
+			cur=nil
+			while varargs.type==PAIR
+				car,cdr=pair_divide(varargs)
+				raise car.to_s+' is not an int' unless car.type==INT
+				res=res && (cur.nil? || cur<=car.data)
+				cur=car.data
+				varargs=cdr
+			end
+			return ruby_to_SObj(res)
+		}
+		map[symbol('>=')]=lambda{|varargs| #argument is passed as a list
+			check_argc(varargs,2,true) # argc>=2
+			res=true
+			cur=nil
+			while varargs.type==PAIR
+				car,cdr=pair_divide(varargs)
+				raise car.to_s+' is not an int' unless car.type==INT
+				res=res && (cur.nil? || cur>=car.data)
+				cur=car.data
+				varargs=cdr
+			end
+			return ruby_to_SObj(res)
+		}
+		map[symbol('quotient')]=lambda{|varargs|
+			check_argc(varargs,2)
+			a1,a2=pair_divide(varargs)
+			a2,_=pair_divide(a2)
+			a1.type==INT or raise "a1 is not an int:"+a1.inspect
+			a2.type==INT or raise "a2 is not an int:"+a2.inspect
+			a1=a1.data
+			a2=a2.data
+			if a2==0
+				raise 'attempt to divide by 0:'+a1.to_s+"/0"
+			end
+			s1=if a1==0 then 0 else a1/a1.abs end
+			s2=a2/a2.abs
+			return ruby_to_SObj(a1.abs/a2.abs*s1*s2)
+		}
+		map[symbol('remainder')]=lambda{|varargs|
+			check_argc(varargs,2)
+			a1,a2=pair_divide(varargs)
+			a2,_=pair_divide(a2)
+			a1.type==INT or raise "a1 is not an int:"+a1.inspect
+			a2.type==INT or raise "a2 is not an int:"+a2.inspect
+			a1=a1.data
+			a2=a2.data
+			if a2==0
+				raise 'attempt to divide by 0:'+a1.to_s+"/0"
+			end
+			s1=if a1==0 then 0 else a1/a1.abs end
+			s2=a2/a2.abs
+			q=a1.abs/a2.abs*s1*s2
+			return ruby_to_SObj(a1-q*a2) #a1.sgn==rem.sgn
+		}
+		map[symbol('modulo')]=lambda{|varargs|
+			check_argc(varargs,2)
+			a1,a2=pair_divide(varargs)
+			a2,_=pair_divide(a2)
+			a1.type==INT or raise "a1 is not an int:"+a1.inspect
+			a2.type==INT or raise "a2 is not an int:"+a2.inspect
+			a1=a1.data
+			a2=a2.data
+			if a2==0
+				raise 'attempt to divide by 0:'+a1.to_s+"/0"
+			end
+			return ruby_to_SObj(a1%a2) #a1.sgn==rem.sgn
 		}
 	end
 end
