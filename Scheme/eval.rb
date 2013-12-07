@@ -462,5 +462,29 @@ module RbScmEval
 			end
 			return ruby_to_SObj(a1%a2) #a1.sgn==rem.sgn
 		}
+		#pairs and lists
+		map[symbol('pair?')]=lambda{|varargs|
+			check_argc(varargs,1)
+			ls,_=pair_divide(varargs)
+			return ruby_to_SObj(ls.type==PAIR)
+		}
+		map[symbol('cons')]=lambda{|varargs|
+			check_argc(varargs,2)
+			obj1,obj2=pair_divide(varargs)
+			obj2,_=pair_divide(obj2)
+			return make_pair(obj1,obj2)
+		}
+		map[symbol('car')]=lambda{|varargs|
+			check_argc(varargs,1)
+			obj,_=pair_divide(varargs)
+			car,cdr=pair_divide(obj)
+			return car
+		}
+		map[symbol('cdr')]=lambda{|varargs|
+			check_argc(varargs,1)
+			obj,_=pair_divide(varargs)
+			car,cdr=pair_divide(obj)
+			return cdr
+		}
 	end
 end

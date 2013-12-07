@@ -149,3 +149,13 @@ p [run('(>= 2 1 0 -1)'), "#t"]
 p [run('(>= 2 1 7 5)'), "#f"]
 puts "-----comparison end"
 
+puts "-----pairs and lists:"
+p [run('(pair? 2)'),false]
+p [run('(pair? (list 1 2))'),true]
+p [run('(pair? (quote ()))'),false]
+
+p [run('(cons (list 2 3) (list 4 5))'),[[2,3],4,5]]
+p [run('(car (list 2 3 4))'),2]
+p [run('(cdr (list 2 3 4))'),[3,4]]
+
+puts "-----pairs and lists end"
