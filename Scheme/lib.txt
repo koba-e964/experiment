@@ -10,3 +10,37 @@
 (define negative? (lambda (x) (< x 0)))
 (define odd? (lambda (x) (= 1 (modulo x 2))))
 (define even? (lambda (x) (= 0 (modulo x 2))))
+
+
+(define list? (lambda (ls)
+	(if (null? ls) #t
+		(if (pair? ls) (list? (cdr ls)) #f)
+	)
+))
+(define length (lambda (ls)
+	(if (null? ls) 0
+		(+ 1 (length (cdr ls)))
+	)
+))
+
+(define lib-local-append2 (lambda (ls1 ls2)
+	(if (null? ls1) ls2
+		(cons (car ls1) (lib-local-append2 (cdr ls1) ls2))
+	)
+))
+(define lib-local-append (lambda (lss)
+	(if (null? lss) (quote ())
+		(if (null? (cdr lss)) (car lss)
+			(lib-local-append2 (car lss) (lib-local-append (cdr lss)))
+		)
+	)
+))
+(define append (lambda lss
+	(lib-local-append lss)
+))
+(define lib-local-reverse-sub (lambda (x y)
+	(if (null? x) y
+		(lib-local-reverse-sub (cdr x) (cons (car x) y))
+	)
+))
+(define reverse (lambda (ls) (lib-local-reverse-sub ls (quote ()))))

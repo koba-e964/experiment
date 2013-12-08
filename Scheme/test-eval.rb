@@ -158,4 +158,17 @@ p [run('(cons (list 2 3) (list 4 5))'),[[2,3],4,5]]
 p [run('(car (list 2 3 4))'),2]
 p [run('(cdr (list 2 3 4))'),[3,4]]
 
+p [run('(list? (cons 2 3))'),false]
+p [run('(list? (cons 2 (cons 3 (list))))'),true]
+
+p [run('(length (list 1 2 3 4 5))'),5]
+p [run('(append (list 1 2 3 4 5) (list 6 7 8) (list 9 10))'),[1,2,3,4,5,6,7,8,9,10]]
+p [run('(append (list) (quote aaa))'),'aaa']
+
+p [run('(reverse (list 1 2 3 4 5))'),[5,4,3,2,1]]
+p [run('(reverse (quote ()))'),[]]
+
+#this code does not work correctly
+#p [run('(list +)'),"(<+>)"]
+
 puts "-----pairs and lists end"
