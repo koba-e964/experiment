@@ -168,7 +168,14 @@ p [run('(append (list) (quote aaa))'),'aaa']
 p [run('(reverse (list 1 2 3 4 5))'),[5,4,3,2,1]]
 p [run('(reverse (quote ()))'),[]]
 
-#this code does not work correctly
-#p [run('(list +)'),"(<+>)"]
+#this code works correctly
+p [run('(list +)'),"(<+>)"]
+
+p [run('(list-tail (list 1 2 3 4 5) 3)'),[4,5]]
+p [run('(list-ref (list 1 2 3 4 5) 3)'),4]
+p [run('(mem-general = 10 (list 1 4 10 3 2))'),[10,3,2]]
+p [run('(assoc-general = 10 (quote ((1 4) (10 3) (2 10))))'),[10,3]]
+
+
 
 puts "-----pairs and lists end"

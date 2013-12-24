@@ -44,3 +44,30 @@
 	)
 ))
 (define reverse (lambda (ls) (lib-local-reverse-sub ls (quote ()))))
+
+(define list-tail (lambda (ls k)
+	(if (= k 0) ls
+		(list-tail (cdr ls) (- k 1))
+	)
+))
+(define list-ref (lambda (ls k) (car (list-tail ls k))))
+
+(define mem-general (lambda (eq obj ls)
+	(if (null? ls) #f
+		(if (eq obj (car ls)) ls
+			(mem-general eq obj (cdr ls))
+		)
+	)
+))
+(define memq (lambda (obj ls) (mem-general eq? obj ls)))
+(define memv (lambda (obj ls) (mem-general eqv? obj ls)))
+(define member (lambda (obj ls) (mem-general equal? obj ls)))
+(define assoc-general (lambda (eq obj ls)
+	(if (null? ls) #f
+		(if (eq obj (car (car ls))) (car ls) (assoc-general eq obj (cdr ls)))
+	)
+))
+(define assq (lambda (obj alist) (assoc-general eq? obj alist)))
+(define assv (lambda (obj alist) (assoc-general eqv? obj alist)))
+(define assoc (lambda (obj alist) (assoc-general equal? obj alist)))
+
