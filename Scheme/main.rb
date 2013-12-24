@@ -9,6 +9,8 @@ module Kind
 	SYNTAX=8
 	VECTOR=9
 	UNDEF=10
+	PROC=11
+	LAMBDA=12
 end
 
 class ScmSymbol
@@ -138,6 +140,14 @@ class SObj
 		@type=UNDEF
 		@data=nil
 	end
+	def set_proc(val)
+		@type=PROC
+		@data=val
+	end
+	def set_lambda(val)
+		@type=LAMBDA
+		@data=val
+	end
 	def to_s()
 		if type==NULL
 			return "()"
@@ -178,6 +188,12 @@ class SObj
 		end
 		if type==UNDEF
 			return "#<undef>"
+		end
+		if type==PROC
+			return "<proc >"
+		end
+		if type==LAMBDA
+			return val.to_s
 		end
 		return ""
 	end
@@ -233,6 +249,14 @@ module RbScm
 		end
 		if val.is_a? ScmSyntax
 			obj.set_syntax(val)
+			return obj
+		end
+		if val.is_a? Proc
+			obj.set_proc(val)
+			return obj
+		end
+		if val.is_a? LambdaClosure
+			obj.set_lambda(val)
 			return obj
 		end
 	end

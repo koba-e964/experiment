@@ -74,11 +74,8 @@ module RbScmEval
 			end
 			args=ruby_to_SObj(args) #convert args from array to list
 			#puts "call("+car.to_s+' => '+func.to_s+", args="+args.to_s+")"
-			if func.is_a? Proc
-				return func[args]
-			end
-			if func.is_a? LambdaClosure
-				return func[args]
+			if func.type==PROC || func.type==LAMBDA
+				return (func.data)[args]
 			end
 			raise 'neiter Proc nor LambdaClosure'
 		when INT
@@ -103,7 +100,6 @@ module RbScmEval
 		check_argc(cdr,2,true) #(param expr...)
 		param,exprs=pair_divide(cdr)
 		inst=LambdaClosure.new(param,exprs,local)
-		return inst
 		ret=SObj.new
 		ret.set_lambda(inst)
 		return ret
@@ -295,8 +291,13 @@ module RbScmEval
 		arglist.type==NULL or raise 'proper list required for arguments of function:'+old.to_s
 		(if vararg then cnt>=num else cnt==num end) or raise 'wrong number of arguments:requirement='+num.to_s+' but received='+old.to_s
 	end
+	def reg_proc(sym,proc)
+		sobj=SObj.new
+		sobj.set_proc(proc)
+		@@map[sym]=sobj
+	end
 	def add_initial_operator(map)
-		map[symbol('+')]=lambda{|varargs| #argument is passed as a list
+		reg_proc(symbol('+'), lambda{|varargs| #argument is passed as a list
 			sum=0
 			while varargs.type==PAIR
 				car=varargs.data[0]
@@ -307,8 +308,8 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless varargs.type==NULL
 			return ruby_to_SObj(sum)
-		}
-		map[symbol('-')]=lambda{|varargs| #argument is passed as a list
+		})
+		reg_proc(symbol('-'), lambda{|varargs| #argument is passed as a list
 			#(>= (length varargs) 1)
 			check_argc(varargs,1,true)
 			sum=0
@@ -325,8 +326,8 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless cdr.type==NULL
 			return ruby_to_SObj(sum)
-		}
-		map[symbol('*')]=lambda{|varargs| #argument is passed as a list
+		})
+		reg_proc(symbol('*'), lambda{|varargs| #argument is passed as a list
 			sum=1
 			while varargs.type==PAIR
 				car=varargs.data[0]
@@ -337,23 +338,23 @@ module RbScmEval
 			end
 			raise 'the terminal of list must be ()' unless varargs.type==NULL
 			return ruby_to_SObj(sum)
-		}
-		map[symbol('null?')]=lambda{|varargs|
+		})
+		reg_proc(symbol('null?'), lambda{|varargs|
 			check_argc(varargs,1) #argument length must be 1
 			car,_=pair_divide(varargs)
 			return ruby_to_SObj(car.type==NULL)
-		}
-		map[symbol('number?')]=lambda{|varargs|
+		})
+		reg_proc(symbol('number?'), lambda{|varargs|
 			check_argc(varargs,1) #argument length must be 1
 			car,_=pair_divide(varargs)
 			return ruby_to_SObj(car.type==INT) #only int is supported
-		}
-		map[symbol('integer?')]=lambda{|varargs|
+		})
+		reg_proc(symbol('integer?'), lambda{|varargs|
 			check_argc(varargs,1) #argument length must be 1
 			car,_=pair_divide(varargs)
 			return ruby_to_SObj(car.type==INT)
-		}
-		map[symbol('<')]=lambda{|varargs| #argument is passed as a list
+		})
+		reg_proc(symbol('<'),lambda{|varargs| #argument is passed as a list
 			check_argc(varargs,2,true) # argc>=2
 			res=true
 			cur=nil
@@ -365,8 +366,8 @@ module RbScmEval
 				varargs=cdr
 			end
 			return ruby_to_SObj(res)
-		}
-		map[symbol('=')]=lambda{|varargs| #argument is passed as a list
+		})
+		reg_proc(symbol('='), lambda{|varargs| #argument is passed as a list
 			check_argc(varargs,2,true) # argc>=2
 			res=true
 			cur=nil
@@ -378,8 +379,8 @@ module RbScmEval
 				varargs=cdr
 			end
 			return ruby_to_SObj(res)
-		}
-		map[symbol('>')]=lambda{|varargs| #argument is passed as a list
+		})
+		reg_proc(symbol('>'), lambda{|varargs| #argument is passed as a list
 			check_argc(varargs,2,true) # argc>=2
 			res=true
 			cur=nil
@@ -391,8 +392,8 @@ module RbScmEval
 				varargs=cdr
 			end
 			return ruby_to_SObj(res)
-		}
-		map[symbol('<=')]=lambda{|varargs| #argument is passed as a list
+		})
+		reg_proc(symbol('<='), lambda{|varargs| #argument is passed as a list
 			check_argc(varargs,2,true) # argc>=2
 			res=true
 			cur=nil
@@ -404,8 +405,8 @@ module RbScmEval
 				varargs=cdr
 			end
 			return ruby_to_SObj(res)
-		}
-		map[symbol('>=')]=lambda{|varargs| #argument is passed as a list
+		})
+		reg_proc(symbol('>='), lambda{|varargs| #argument is passed as a list
 			check_argc(varargs,2,true) # argc>=2
 			res=true
 			cur=nil
@@ -417,8 +418,8 @@ module RbScmEval
 				varargs=cdr
 			end
 			return ruby_to_SObj(res)
-		}
-		map[symbol('quotient')]=lambda{|varargs|
+		})
+		reg_proc(symbol('quotient'), lambda{|varargs|
 			check_argc(varargs,2)
 			a1,a2=pair_divide(varargs)
 			a2,_=pair_divide(a2)
@@ -432,8 +433,8 @@ module RbScmEval
 			s1=if a1==0 then 0 else a1/a1.abs end
 			s2=a2/a2.abs
 			return ruby_to_SObj(a1.abs/a2.abs*s1*s2)
-		}
-		map[symbol('remainder')]=lambda{|varargs|
+		})
+		reg_proc(symbol('remainder'), lambda{|varargs|
 			check_argc(varargs,2)
 			a1,a2=pair_divide(varargs)
 			a2,_=pair_divide(a2)
@@ -448,8 +449,8 @@ module RbScmEval
 			s2=a2/a2.abs
 			q=a1.abs/a2.abs*s1*s2
 			return ruby_to_SObj(a1-q*a2) #a1.sgn==rem.sgn
-		}
-		map[symbol('modulo')]=lambda{|varargs|
+		})
+		reg_proc(symbol('modulo'), lambda{|varargs|
 			check_argc(varargs,2)
 			a1,a2=pair_divide(varargs)
 			a2,_=pair_divide(a2)
@@ -461,30 +462,30 @@ module RbScmEval
 				raise 'attempt to divide by 0:'+a1.to_s+"/0"
 			end
 			return ruby_to_SObj(a1%a2) #a1.sgn==rem.sgn
-		}
+		})
 		#pairs and lists
-		map[symbol('pair?')]=lambda{|varargs|
+		reg_proc(symbol('pair?'), lambda{|varargs|
 			check_argc(varargs,1)
 			ls,_=pair_divide(varargs)
 			return ruby_to_SObj(ls.type==PAIR)
-		}
-		map[symbol('cons')]=lambda{|varargs|
+		})
+		reg_proc(symbol('cons'), lambda{|varargs|
 			check_argc(varargs,2)
 			obj1,obj2=pair_divide(varargs)
 			obj2,_=pair_divide(obj2)
 			return make_pair(obj1,obj2)
-		}
-		map[symbol('car')]=lambda{|varargs|
+		})
+		reg_proc(symbol('car'), lambda{|varargs|
 			check_argc(varargs,1)
 			obj,_=pair_divide(varargs)
 			car,cdr=pair_divide(obj)
 			return car
-		}
-		map[symbol('cdr')]=lambda{|varargs|
+		})
+		reg_proc(symbol('cdr'), lambda{|varargs|
 			check_argc(varargs,1)
 			obj,_=pair_divide(varargs)
 			car,cdr=pair_divide(obj)
 			return cdr
-		}
+		})
 	end
 end
