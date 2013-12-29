@@ -185,3 +185,5 @@ puts "-----let, let* and letrec:"
 p [run('(let ((x 1) (y 2)) (+ x y))'),3]
 p [run('(let ((x 1) (y 2)) (let ((x y) (y (+ x 10))) (list x y)))'),[2,11]]
 
+p [run('(let ((x 2) (y 3)) (let* ((x 7) (z (+ x y))) (* z x)))'),70]
+p [run('(let ((x 1) (y 2)) (let* ((x y) (y (+ x 10))) (list x y)))'),[2,12]]

@@ -61,8 +61,9 @@ module RbScmEval
 					return eval_or(cdr,local)
 				when "let"
 					return eval_let(cdr,local)
-				when "case",
-					"let*","letrec","do","delay","quasiquote"
+				when "let*"
+					return eval_letstar(cdr,local)
+				when "case", "letrec", "do", "delay", "quasiquote"
 					raise 'unsupported syntax'+str
 				end
 				raise "Illegal state. Something wrong happened."
@@ -220,6 +221,20 @@ module RbScmEval
 		copy=local.copy
 		for k,v in varmap
 			copy[k]=v
+		end
+		return eval_begin(exprs,copy)
+	end
+	def eval_letstar(cdr,local) #(let* ((name init)...) expr), evaluation of initial values and bindings are done one after another.
+		check_argc(cdr,2,true)
+		bindings,exprs=pair_divide(cdr)
+		copy=local.copy
+		#duplicate variable names are allowed.
+		while bindings.type!=NULL
+			b,bindings=pair_divide(bindings)
+			check_argc(b,2)
+			name,init=pair_divide(b)
+			init,_=pair_divide(init)
+			copy[name.data]=sobj_eval_sym(init,copy) #evaluates in copy
 		end
 		return eval_begin(exprs,copy)
 	end
