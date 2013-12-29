@@ -179,3 +179,9 @@ p [run('(assoc-general = 10 (quote ((1 4) (10 3) (2 10))))'),[10,3]]
 
 
 puts "-----pairs and lists end"
+
+
+puts "-----let, let* and letrec:"
+p [run('(let ((x 1) (y 2)) (+ x y))'),3]
+p [run('(let ((x 1) (y 2)) (let ((x y) (y (+ x 10))) (list x y)))'),[2,11]]
+

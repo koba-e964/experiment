@@ -59,7 +59,9 @@ module RbScmEval
 					return eval_and(cdr,local)
 				when "or"
 					return eval_or(cdr,local)
-				when "case","let",
+				when "let"
+					return eval_let(cdr,local)
+				when "case",
 					"let*","letrec","do","delay","quasiquote"
 					raise 'unsupported syntax'+str
 				end
@@ -200,6 +202,26 @@ module RbScmEval
 			res=sobj_eval_sym(car,local)
 		end
 		return res
+	end
+	def eval_let(cdr,local) #(let ((name init)...) expr), every initial value is evaluated before bindings.
+		check_argc(cdr,2,true)
+		bindings,exprs=pair_divide(cdr)
+		varmap={}
+		while bindings.type!=NULL
+			b,bindings=pair_divide(bindings)
+			check_argc(b,2)
+			name,init=pair_divide(b)
+			init,_=pair_divide(init)
+			if varmap.has_key? name.data
+				raise 'duplicate variables in let, name:'+name.data.to_s
+			end
+			varmap[name.data]=sobj_eval_sym(init,local) #evaluates in given environment
+		end
+		copy=local.copy
+		for k,v in varmap
+			copy[k]=v
+		end
+		return eval_begin(exprs,copy)
 	end
 end
 
