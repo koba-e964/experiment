@@ -187,3 +187,16 @@ p [run('(let ((x 1) (y 2)) (let ((x y) (y (+ x 10))) (list x y)))'),[2,11]]
 
 p [run('(let ((x 2) (y 3)) (let* ((x 7) (z (+ x y))) (* z x)))'),70]
 p [run('(let ((x 1) (y 2)) (let* ((x y) (y (+ x 10))) (list x y)))'),[2,12]]
+
+p [run(<<EOS),[true,false,false]]
+(letrec (
+		(e (lambda (n)
+			(if (zero? n) #t (o (- n 1)))
+		))
+		(o (lambda (n)
+			(if(zero? n) #f (e (- n 1)))
+		))
+	)
+	(list (e 6) (o 10) (e 7))
+)
+EOS

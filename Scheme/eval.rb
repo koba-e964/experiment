@@ -63,7 +63,9 @@ module RbScmEval
 					return eval_let(cdr,local)
 				when "let*"
 					return eval_letstar(cdr,local)
-				when "case", "letrec", "do", "delay", "quasiquote"
+				when "letrec"
+					return eval_letrec(cdr,local)
+				when "case", "do", "delay", "quasiquote"
 					raise 'unsupported syntax'+str
 				end
 				raise "Illegal state. Something wrong happened."
@@ -235,6 +237,26 @@ module RbScmEval
 			name,init=pair_divide(b)
 			init,_=pair_divide(init)
 			copy[name.data]=sobj_eval_sym(init,copy) #evaluates in copy
+		end
+		return eval_begin(exprs,copy)
+	end
+	def eval_letrec(cdr,local) #(letrec ((name init)...) expr), the binding rule is complicated.
+		check_argc(cdr,2,true)
+		bindings,exprs=pair_divide(cdr)
+		copy=local.copy
+		blist=[]
+		while bindings.type!=NULL
+			b,bindings=pair_divide(bindings)
+			check_argc(b,2)
+			name,init=pair_divide(b)
+			init,_=pair_divide(init)
+			blist=blist+[[name,init]]
+		end
+		for name,_ in blist
+			copy[name.data]=make_undef()
+		end
+		for name,init in blist
+			copy[name.data]=sobj_eval_sym(init,copy)
 		end
 		return eval_begin(exprs,copy)
 	end
