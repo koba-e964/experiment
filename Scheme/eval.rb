@@ -105,9 +105,16 @@ module RbScmEval
 		return ret
 	end
 	#(varname expr)
-	def eval_define(cdr,local) #TODO this method doesn't support (define (func args...) expr)
+	def eval_define(cdr,local) #this method defines global variables. internal definitions are not supported.
 		check_argc(cdr,2)
 		varname,expr=pair_divide(cdr)
+		if varname.type==PAIR # definition of function
+			funcname,args=pair_divide(varname)
+			#(lambda args expr)
+			lambdaexpr=make_pair(make_syntax("lambda"),make_pair(args,expr))
+			funcname.type==SYMBOL or raise 'not symbol:'+funcname.to_s
+			return eval_define(make_pair(funcname,make_pair(lambdaexpr,make_null)),local) # recursive invocation
+		end
 		expr,_=pair_divide(expr)
 		v=sobj_eval_sym(expr,local)
 		varname.type==SYMBOL or raise 'not symbol:'+varname.to_s
@@ -254,12 +261,13 @@ class LambdaClosure
 		@env=env
 	end
 	def [](args) #evaluation
+		argcopy=args
 		copy=env.copy
 		pr=param
 		while(pr.type==PAIR)
 			pn,pr=pair_divide(pr)
 			#pn<-args[?]
-			raise 'too few argument param='+pn.to_s unless args.type==PAIR
+			raise 'too few arguments param='+param.to_s+' args='+argcopy.to_s unless args.type==PAIR
 			val,args=pair_divide(args)
 			copy[pn.data]=val #overwrite if already defined
 		end
@@ -267,6 +275,9 @@ class LambdaClosure
 			# pr is symbol (rest parameter)
 			pr.type==SYMBOL or raise 'not symbol:'+pr.inspect
 			copy[pr.data]=args
+		else
+			#not variable-length-argument, too many arguments
+			args.type==NULL or raise 'too many arguments param='+param.to_s+' args='+argcopy.to_s
 		end
 		return eval_begin(exprs,copy)
 	end
