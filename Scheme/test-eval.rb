@@ -200,3 +200,7 @@ p [run(<<EOS),[true,false,false]]
 	(list (e 6) (o 10) (e 7))
 )
 EOS
+puts "-----let, let* and letrec end"
+puts "-----do:"
+p [run('(do ((s ()) (i 0 (+ i 1))) ((= i 5) s) (set! s (cons i s)))'),[4,3,2,1,0]]
+

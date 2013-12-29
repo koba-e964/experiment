@@ -65,7 +65,9 @@ module RbScmEval
 					return eval_letstar(cdr,local)
 				when "letrec"
 					return eval_letrec(cdr,local)
-				when "case", "do", "delay", "quasiquote"
+				when "do"
+					return eval_do(cdr,local)
+				when "case", "delay", "quasiquote"
 					raise 'unsupported syntax'+str
 				end
 				raise "Illegal state. Something wrong happened."
@@ -259,6 +261,41 @@ module RbScmEval
 			copy[name.data]=sobj_eval_sym(init,copy)
 		end
 		return eval_begin(exprs,copy)
+	end
+	def eval_do(cdr,local) #( ((var init step)...) (test expr...) cmds...)
+		check_argc(cdr,3,true)
+		iter,rest1=pair_divide(cdr)
+		ending,cmds=pair_divide(rest1)
+		copy=local.copy
+		stepmap={}
+		while iter.type!=NULL
+			vis,iter=pair_divide(iter) #var init step->vis
+			check_argc(vis,2,true) # 2 or 3
+			var,is=pair_divide(vis)
+			init,step=pair_divide(is)
+			if step.type==NULL #step is not given
+				step=var #step has no effect
+			else
+				step,nulllist=pair_divide(step)
+				check_argc(nulllist,0)
+			end
+			copy[var.data]=sobj_eval_sym(init,local)
+			stepmap[var.data]=step
+		end
+		test,exprs=pair_divide(ending)
+		while true
+			res=sobj_eval_sym(test,copy)
+			if scm_true?(res)
+				return eval_begin(exprs,copy)
+			end
+			#the loop continues
+			eval_begin(cmds,copy)
+			#steps
+			for name,step in stepmap
+				copy[name]=sobj_eval_sym(step,copy)
+			end
+		end
+		raise 'unreachable code'
 	end
 end
 
