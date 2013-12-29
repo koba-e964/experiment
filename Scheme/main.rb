@@ -193,7 +193,7 @@ class SObj
 			return "<proc >"
 		end
 		if type==LAMBDA
-			return val.to_s
+			return data.to_s
 		end
 		return ""
 	end
