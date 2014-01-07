@@ -67,7 +67,9 @@ module RbScmEval
 					return eval_letrec(cdr,local)
 				when "do"
 					return eval_do(cdr,local)
-				when "case", "delay", "quasiquote"
+				when "case"
+					return eval_case(cdr,local)
+				when  "delay", "quasiquote"
 					raise 'unsupported syntax'+str
 				end
 				raise "Illegal state. Something wrong happened."
@@ -296,6 +298,31 @@ module RbScmEval
 			end
 		end
 		raise 'unreachable code'
+	end
+	def list_contains(key,ls)
+		while ls.type!=NULL
+			a,ls=pair_divide(ls)
+			res=sobj_eval(ruby_to_SObj([symbol("eqv?"), key, a]))
+			if(scm_true?(res))
+				return true
+			end
+		end
+		return false
+	end
+	# (key ((data...) exprs...)...), data are not evaluated.
+	def eval_case(cdr,local)
+		check_argc(cdr,1,true) # 1+
+		key,rest=pair_divide(cdr)
+		key=sobj_eval_sym(key,local)
+		while rest.type!=NULL
+			de,rest=pair_divide(rest)
+			data,exprs=pair_divide(de)
+			if((data==make_symbol("else") && rest.type==NULL) ||
+				 list_contains(key,data))
+				return eval_begin(exprs,local)
+			end
+		end
+		return make_undef()
 	end
 end
 
@@ -593,6 +620,21 @@ module RbScmEval
 			obj,_=pair_divide(varargs)
 			car,cdr=pair_divide(obj)
 			return cdr
+		})
+		reg_proc(symbol('eqv?'),lambda{|varargs|
+			check_argc(varargs,2)
+			a,rest=pair_divide(varargs)
+			b,_=pair_divide(rest)
+			if a.type!=b.type
+				return ruby_to_SObj(false)
+			end
+			case a.type
+			when BOOL, SYMBOL, INT, CHAR
+				return ruby_to_SObj(a.data==b.data)
+			when NULL
+				return ruby_to_SObj(true)
+			end
+			return ruby_to_SObj(a.object_id==b.object_id)
 		})
 	end
 end

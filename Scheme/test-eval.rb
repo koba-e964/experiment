@@ -203,4 +203,10 @@ EOS
 puts "-----let, let* and letrec end"
 puts "-----do:"
 p [run('(do ((s ()) (i 0 (+ i 1))) ((= i 5) s) (set! s (cons i s)))'),[4,3,2,1,0]]
+puts "-----do end"
 
+puts "-----eqv?"
+p [run('(begin (define x (list 2 1 0)) (list (eqv? x x) (eqv? x (list 2 1 0))))'),[true,false]]
+
+puts "-----case"
+p [run('(case (+ 10 5) ((1 10 15) (quote first)) ((2 13 16) (quote second)) (else (quote else)))'),"first"]
