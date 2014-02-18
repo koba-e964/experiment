@@ -10,6 +10,6 @@ A calculator which can interpret arithmetic expressions.
 |^ | |
 | % | |
 | () | |
-|HUnit| |
+|HUnit| ok |
 | variables| |
 
