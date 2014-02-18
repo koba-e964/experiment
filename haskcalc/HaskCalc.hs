@@ -1,5 +1,7 @@
 module HaskCalc where
 import Control.Applicative hiding ((<|>))
+import Data.Map hiding (foldl,foldl')
+import Data.List (foldl')
 import Text.ParserCombinators.Parsec
 
 number:: Parser Double
@@ -13,52 +15,36 @@ number=do
 			setInput (rest++gi)
 			return x;
 
-data MultiDiv=Multi|Div deriving (Eq,Show)
+-- deriveOne returns a derivation tree (of type (Double,[(a,Double)])).
+type DoubleBiop=Double->Double->Double
+deriveOne :: [String]->Map String a->Parser Double->Parser (Double,[(a,Double)]) -- a:Operator type
+deriveOne ops mp parent=do
+	x<-parent
+	(foldl' (<|>) pzero [try(do{
+		string op;
+		(t,y)<-deriveOne ops mp parent;
+		return $ (x,(mp!op,t):y)
+	})|op<-ops])<|>return (x,[])
+
+simplify :: (Double,[(DoubleBiop,Double)])->Double
+simplify derivTree=let (x,ls)=derivTree in
+	foldl (\x (op,y)->op x y) x ls
+
+deriveOneAndSimplify::[String]->Map String DoubleBiop->Parser Double->Parser Double
+deriveOneAndSimplify ops mp parent=simplify <$> (deriveOne ops mp parent)
+
+data MultiDiv=Multi|Div deriving (Eq,Show,Ord)
 
 multi_list :: Parser (Double,[(MultiDiv,Double)])
-multi_list = do
-	x<-number
-	try(do{
-		char '*';
-		(t,y)<-multi_list;
-		return $ (x,(Multi,t):y);
-	})<|>try(do{
-		char '/';
-		(t,y)<-multi_list;
-		return $ (x,(Div,t):y);
-	})<|>return (x,[])
-
+multi_list = deriveOne ["*","/"] (fromList [("*",Multi),("/",Div)]::Map String MultiDiv) number
 multi :: Parser Double
-multi =do
-	(x,ls)<-multi_list
-	return $ foldl k x ls
-	where{
-		k x (Multi,y)=x*y;
-		k x (Div,y)=x/y;
-	}
+multi=deriveOneAndSimplify ["*","/"] (fromList [("*",(*)),("/",(/))]) number
 
-data AddSubt=Add|Subt deriving (Eq,Show)
+data AddSubt=Add|Subt deriving (Eq,Show,Ord)
 additive_list :: Parser (Double,[(AddSubt,Double)])
-additive_list = do
-	x<-multi
-	try(do{
-		char '+';
-		(t,y)<-additive_list;
-		return $ (x,(Add,t):y);
-	})<|>try(do{
-		char '-';
-		(t,y)<-additive_list;
-		return $ (x,(Subt,t):y);
-	})<|>return (x,[])
-
+additive_list = deriveOne ["+","-"] (fromList [("+",Add),("-",Subt)]::Map String AddSubt) multi
 additive :: Parser Double
-additive = do
-	(x,ls)<-additive_list
-	return $ foldl k x ls
-	where{
-		k x (Add,y)=x+y;
-		k x (Subt,y)=x-y;
-	}
+additive=deriveOneAndSimplify ["+","-"] (fromList [("+",(+)),("-",(-))]) multi
 
 expr :: Parser Double
 expr=additive
