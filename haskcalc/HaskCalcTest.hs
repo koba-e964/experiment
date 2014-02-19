@@ -40,7 +40,8 @@ tests_rem=TestList [
 tests_exp=TestList [
 	eval "4^4" ~?= Right 256,
 	eval "0.0^0.0" ~?= Right 1,
-	eval "0.0^-1.0" ~?= Right (1/0)]
+	eval "0.0^-1.0" ~?= Right (1/0),
+	eval "2*3^4" ~?= Right 162]
 
 -- tests for ()
 tests_paren=TestList [

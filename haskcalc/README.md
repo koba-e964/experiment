@@ -7,7 +7,7 @@ A calculator which can interpret arithmetic expressions.
 | item | status |
 | --- | --- | --- |
 | +-*/ | ok |
-|^ | |
+|^ | ok |
 | % | ok |
 | () | |
 |HUnit| ok |

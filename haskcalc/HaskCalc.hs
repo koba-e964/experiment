@@ -34,15 +34,18 @@ simplify derivTree=let (x,ls)=derivTree in
 deriveOneAndSimplify::Map String DoubleBiop->Parser Double->Parser Double
 deriveOneAndSimplify mp parent=simplify <$> (deriveOne mp parent)
 
+exponential ::Parser Double
+exponential = deriveOneAndSimplify (fromList [("^",(**))]) number
+
 data MultiDiv=Multi|Div|Rem deriving (Eq,Show,Ord)
 
 doubleRem x 0=x
 doubleRem x y=let i=fromIntegral (floor (x/y)) in x-y*i
 
 multi_list :: Parser (Double,[(MultiDiv,Double)])
-multi_list = deriveOne (fromList [("*",Multi),("/",Div),("%",Rem)]::Map String MultiDiv) number
+multi_list = deriveOne (fromList [("*",Multi),("/",Div),("%",Rem)]::Map String MultiDiv) exponential
 multi :: Parser Double
-multi=deriveOneAndSimplify (fromList [("*",(*)),("/",(/)),("%",doubleRem)]) number
+multi=deriveOneAndSimplify (fromList [("*",(*)),("/",(/)),("%",doubleRem)]) exponential
 
 data AddSubt=Add|Subt deriving (Eq,Show,Ord)
 additive_list :: Parser (Double,[(AddSubt,Double)])
