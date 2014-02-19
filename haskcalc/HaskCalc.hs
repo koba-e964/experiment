@@ -15,14 +15,15 @@ number=do
 			setInput (rest++gi)
 			return x;
 
--- deriveOne returns a derivation tree (of type (Double,[(a,Double)])).
 type DoubleBiop=Double->Double->Double
-deriveOne :: [String]->Map String a->Parser Double->Parser (Double,[(a,Double)]) -- a:Operator type
-deriveOne ops mp parent=do
+-- deriveOne returns a derivation tree (of type (Double,[(a,Double)])).
+deriveOne :: Map String a->Parser Double->Parser (Double,[(a,Double)]) -- a:Operator type
+deriveOne mp parent=do
+	let{ops=keys mp;}
 	x<-parent
 	(foldl' (<|>) pzero [try(do{
 		string op;
-		(t,y)<-deriveOne ops mp parent;
+		(t,y)<-deriveOne mp parent;
 		return $ (x,(mp!op,t):y)
 	})|op<-ops])<|>return (x,[])
 
@@ -30,21 +31,21 @@ simplify :: (Double,[(DoubleBiop,Double)])->Double
 simplify derivTree=let (x,ls)=derivTree in
 	foldl (\x (op,y)->op x y) x ls
 
-deriveOneAndSimplify::[String]->Map String DoubleBiop->Parser Double->Parser Double
-deriveOneAndSimplify ops mp parent=simplify <$> (deriveOne ops mp parent)
+deriveOneAndSimplify::Map String DoubleBiop->Parser Double->Parser Double
+deriveOneAndSimplify mp parent=simplify <$> (deriveOne mp parent)
 
 data MultiDiv=Multi|Div deriving (Eq,Show,Ord)
 
 multi_list :: Parser (Double,[(MultiDiv,Double)])
-multi_list = deriveOne ["*","/"] (fromList [("*",Multi),("/",Div)]::Map String MultiDiv) number
+multi_list = deriveOne (fromList [("*",Multi),("/",Div)]::Map String MultiDiv) number
 multi :: Parser Double
-multi=deriveOneAndSimplify ["*","/"] (fromList [("*",(*)),("/",(/))]) number
+multi=deriveOneAndSimplify (fromList [("*",(*)),("/",(/))]) number
 
 data AddSubt=Add|Subt deriving (Eq,Show,Ord)
 additive_list :: Parser (Double,[(AddSubt,Double)])
-additive_list = deriveOne ["+","-"] (fromList [("+",Add),("-",Subt)]::Map String AddSubt) multi
+additive_list = deriveOne (fromList [("+",Add),("-",Subt)]::Map String AddSubt) multi
 additive :: Parser Double
-additive=deriveOneAndSimplify ["+","-"] (fromList [("+",(+)),("-",(-))]) multi
+additive=deriveOneAndSimplify (fromList [("+",(+)),("-",(-))]) multi
 
 expr :: Parser Double
 expr=additive
