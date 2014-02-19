@@ -3,6 +3,20 @@ import HaskCalc
 main :: IO ()
 main=runTestTT alltests >> return ()
 
+-- utility for Double-value check
+assertDoubleEqual :: String->Double->Double->Double->Assertion
+assertDoubleEqual msg expected actual eps=
+	assertBool msg (if expected==0.0 then abs actual <= eps
+	else abs (actual/expected-1) <=eps)
+
+(~===?) :: Double->Double->Test
+expected ~===? actual = TestCase (assertDoubleEqual ("expected:"++(show expected)++", actual:"++(show actual))
+	expected actual 1e-11)
+
+(~?===) :: Double->Double->Test
+actual ~?=== expected = TestCase (assertDoubleEqual ("expected:"++(show expected)++", actual:"++(show actual))
+	expected actual 1e-11)
+
 -- tests for eval
 
 alltests=TestList [tests_muladd, tests_rem, tests_exp, tests_paren]
@@ -19,8 +33,8 @@ tests_muladd=TestList [
 	eval "1+2*3+4" ~?= Right 11]
 -- tests for % (remainder)
 tests_rem=TestList [
-	eval "3%4" ~?= Right 2,
-	eval "10.43%2.5" ~?= Right 0.42]
+	eval "6%4" ~?= Right 2,
+	(case eval "10.43%2.5" of Right x->x) ~?=== 0.43]
 
 -- tests for ^ (exponential)
 tests_exp=TestList [
