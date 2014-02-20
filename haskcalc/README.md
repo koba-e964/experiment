@@ -9,7 +9,7 @@ A calculator which can interpret arithmetic expressions.
 | +-*/ | ok |
 |^ | ok |
 | % | ok |
-| () | |
+| () | ok |
 |HUnit| ok |
 | variables| |
 

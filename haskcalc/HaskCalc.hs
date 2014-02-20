@@ -35,7 +35,7 @@ deriveOneAndSimplify::Map String DoubleBiop->Parser Double->Parser Double
 deriveOneAndSimplify mp parent=simplify <$> (deriveOne mp parent)
 
 exponential ::Parser Double
-exponential = deriveOneAndSimplify (fromList [("^",(**))]) number
+exponential = deriveOneAndSimplify (fromList [("^",(**))]) (number<|> paren_expr)
 
 data MultiDiv=Multi|Div|Rem deriving (Eq,Show,Ord)
 
@@ -53,8 +53,11 @@ additive_list = deriveOne (fromList [("+",Add),("-",Subt)]::Map String AddSubt) 
 additive :: Parser Double
 additive=deriveOneAndSimplify (fromList [("+",(+)),("-",(-))]) multi
 
+paren_expr :: Parser Double
+paren_expr=char '(' *> expr <* char ')'
+
 expr :: Parser Double
-expr=additive
+expr=additive <|> paren_expr
 
 eval :: String->Either String Double
 eval str=case parse expr "Parse error" str of
