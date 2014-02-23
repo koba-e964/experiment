@@ -1,4 +1,4 @@
-RbScm
+Scheme on Ruby
 ----
 A Scheme interpreter on Ruby. This is also called "inter-printer".
 
@@ -8,7 +8,7 @@ Keywords
 | keyword | status |
 | --- | --- |
 | define | ok |
-| define-syntax | no|
+| define-syntax | |
 | quote |ok |
 |lambda |ok|
 |if|ok|
@@ -22,7 +22,20 @@ Keywords
 |letrec|ok|
 |do|ok|
 |case|ok|
-|delay|no|
-|quasiquote|no|
+|delay| |
+|quasiquote| |
 
-
+| section | status |
+| --- | --- |
+|6.1 Equivalence predicates | |
+| 6.2.5 Numerical operations | supports only integers |
+| 6.2.6 Numerical input and output | not supported|
+|6.3.1 Booleans | ok|
+|6.3.2 Pairs and lists | ok |
+|6.3.3 Symbols |not supported|
+|6.3.4 Characters |not supported|
+|6.3.5 Strings |buggy|
+|6.3.6 Vectors |  |
+|6.4 Control features| |
+|6.5 Eval | |
+|6.6 Input and output| |
