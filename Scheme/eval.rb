@@ -87,7 +87,7 @@ module RbScmEval
 				return (func.data)[args]
 			end
 			raise 'neiter Proc nor LambdaClosure'
-		when INT
+		when INT, STRING, SYNTAX, BOOL
 			return sobj.clone
 		when SYMBOL
 			res=local[sobj.data]
@@ -98,10 +98,6 @@ module RbScmEval
 				raise "symbol '"+sobj.to_s+"' not found"
 			end
 			return res
-		when SYNTAX
-			return sobj.clone
-		when BOOL
-			return sobj.clone
 		end
 		raise Exception
 	end

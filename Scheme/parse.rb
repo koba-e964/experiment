@@ -56,7 +56,7 @@ module RbScmTokenize
 				if(!closed)
 					raise 'string literal not closed'
 				end
-				ary+=[cur]
+				ary+=['"'+cur] # ad-hoc fix. a symbol with first char '"' is regarded as a string.
 				ptr+=1
 				cur=''
 				next
@@ -219,9 +219,11 @@ module RbScmParse
 		end
 		return [make_vector(pool),sum+1]
 	end
-	def parse_symbol_or_syntax(ary)
+	def parse_symbol_or_syntax_or_string(ary)
 		str=ary[0]
 		case
+		when str[0]=='"' #string
+			return [make_str(str[1...str.size()]),1]
 		when ScmSymbol::valid?(str)
 			return [make_symbol(str),1]
 		when ScmSyntax::valid?(str)
@@ -240,7 +242,7 @@ module RbScmParse
 		when vector?(ary)
 			return parse_vector(ary)
 		end
-		return parse_symbol_or_syntax(ary)
+		return parse_symbol_or_syntax_or_string(ary)
 	end
 end # module RbScmParse
 

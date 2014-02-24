@@ -260,6 +260,11 @@ module RbScm
 			return obj
 		end
 	end
+	def make_str(val)
+		obj=SObj.new()
+		obj.set_str(val)
+		return obj
+	end
 	def make_null()
 		obj=SObj.new()
 		obj.set_null
