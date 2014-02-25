@@ -9,19 +9,27 @@ include RbScmEval
 include RbScmTokenize
 include RbScmParse
 
+$rbscm_tests=0
+$rbscm_succs=0 #success
+
 def assert_equal(actual,exp)
+	$rbscm_tests+=1
 	if actual != exp
 		puts "expected:"+exp.to_s+", but actual:"+actual.to_s
+		return
 	end
+	$rbscm_succs+=1
 end
 
 def test_eval(expr,expected)
+	$rbscm_tests+=1
 	exp_s=ruby_to_SObj(expected)
 	begin
 			actual=run(expr)
 		if actual != exp_s
 			puts "expr:"+expr+", expected:"+exp_s.to_s+", actual:"+actual.to_s
 		end
+		$rbscm_succs+=1
 		return
 	rescue => ex
 		puts "expr:"+expr+", expected:"+exp_s.to_s+", got:"
@@ -59,14 +67,31 @@ def read_file(filename)
 end
 read_file('lib.txt')
 
+def test_init
+	$rbscm_tests=0
+	$rbscm_succs=0
+end
+
+def test_summary
+	t=$rbscm_tests
+	s=$rbscm_succs
+	f=t-s #failures
+	puts "Test:"+t.to_s+"     Success:"+s.to_s+"     Failure:"+f.to_s
+end
+
+test_init
 
 test_eval '(+ 1 2 3)', 6
 test_eval '(if (set! x 3) x 1)', 3
 
 test_eval '(cond ((quote (1 3)) => (lambda (x) x)))', [1,3]
 
-#and or
+puts "----- 4.2.1 Conditionals"
 
+# case
+test_eval '(case (+ 10 5) ((1 10 15) (quote first)) ((2 13 16) (quote second)) (else (quote else)))', make_symbol("first")
+
+#and or
 test_eval '(and #t 2 3 4 5)', 5
 test_eval '(or #f ((lambda (x) x) #f) #f)', false
 
@@ -92,6 +117,24 @@ test_eval <<EOS, [true,false,false]
 EOS
 
 
+puts "----- 4.2.4 Iteration:"
+# do
+test_eval '(do ((s ()) (i 0 (+ i 1))) ((= i 5) s) (set! s (cons i s)))',[4,3,2,1,0]
+
+# named let
+expr=<<EOS
+(let loop ((numbers '(3 -2 1 6 -5))
+		(nonneg '())
+		(neg '()))
+	(cond ((null? numbers) (list nonneg neg))
+		((>= (car numbers) 0)
+			(loop (cdr numbers) (cons (car numbers) nonneg) neg))
+		((< (car numbers) 0)
+			(loop (cdr numbers) nonneg (cons (car numbers) neg)))))
+EOS
+test_eval expr, [[6,1,3],[-5,-2]]
+
+puts "--env"
 #environment
 test_eval '(define a 2) ((lambda (a) a)8) a', 2
 
@@ -188,26 +231,5 @@ test_eval '(list-ref (list 1 2 3 4 5) 3)', 4
 test_eval '(mem-general = 10 (list 1 4 10 3 2))',[10,3,2]
 test_eval '(assoc-general = 10 (quote ((1 4) (10 3) (2 10))))',[10,3]
 
+test_summary
 
-
-puts "----- 4.2.4 Iteration:"
-# do
-test_eval '(do ((s ()) (i 0 (+ i 1))) ((= i 5) s) (set! s (cons i s)))',[4,3,2,1,0]
-
-# named let
-expr=<<EOS
-(let loop ((numbers '(3 -2 1 6 -5))
-		(nonneg '())
-		(neg '()))
-	(cond ((null? numbers) (list nonneg neg))
-		((>= (car numbers) 0)
-			(loop (cdr numbers) (cons (car numbers) nonneg) neg))
-		((< (car numbers) 0)
-			(loop (cdr numbers) nonneg (cons (car numbers) neg)))))
-EOS
-test_eval expr, [[6,1,3],[-5,-2]]
-
-
-
-puts "-----case"
-test_eval '(case (+ 10 5) ((1 10 15) (quote first)) ((2 13 16) (quote second)) (else (quote else)))', make_symbol("first")
