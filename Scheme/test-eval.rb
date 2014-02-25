@@ -86,6 +86,17 @@ test_eval '(if (set! x 3) x 1)', 3
 
 test_eval '(cond ((quote (1 3)) => (lambda (x) x)))', [1,3]
 
+puts "----- 4.1.3 Procedure calls"
+test_eval '((if #f + *) 3 4)', 12
+#environment
+test_eval '(define a 2) ((lambda (a) a)8) a', 2
+
+puts "----- 4.1.4 Procedures"
+test_eval '((lambda (x) (+ x x)) 4)', 8
+#environment
+test_eval '(define a 2) ((lambda (a) a)8)', 8
+
+
 puts "----- 4.2.1 Conditionals"
 
 # case
@@ -133,13 +144,6 @@ expr=<<EOS
 			(loop (cdr numbers) nonneg (cons (car numbers) neg)))))
 EOS
 test_eval expr, [[6,1,3],[-5,-2]]
-
-puts "--env"
-#environment
-test_eval '(define a 2) ((lambda (a) a)8) a', 2
-
-#improper list
-test_eval '(define imp-list-0 (quote (2 . 4))) imp-list-0', make_pair(make_int(2),make_int(4))
 
 
 
@@ -230,6 +234,10 @@ test_eval '(list-tail (list 1 2 3 4 5) 3)',[4,5]
 test_eval '(list-ref (list 1 2 3 4 5) 3)', 4
 test_eval '(mem-general = 10 (list 1 4 10 3 2))',[10,3,2]
 test_eval '(assoc-general = 10 (quote ((1 4) (10 3) (2 10))))',[10,3]
+
+#improper list
+test_eval '(define imp-list-0 (quote (2 . 4))) imp-list-0', make_pair(make_int(2),make_int(4))
+
 
 test_summary
 
