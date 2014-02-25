@@ -86,13 +86,11 @@ test_eval <<EOS, [true,false,false]
 EOS
 
 
-
-
 #environment
 test_eval '(define a 2) ((lambda (a) a)8) a', 2
 
 #improper list
-test_eval '(define imp-list-0 (quote (2 . 4))) imp-list-0', [2,'.',4]
+test_eval '(define imp-list-0 (quote (2 . 4))) imp-list-0', make_pair(make_int(2),make_int(4))
 
 
 
@@ -173,12 +171,10 @@ test_eval '(list? (cons 2 (cons 3 (list))))', true
 
 test_eval '(length (list 1 2 3 4 5))',5
 test_eval '(append (list 1 2 3 4 5) (list 6 7 8) (list 9 10))', [1,2,3,4,5,6,7,8,9,10]
-test_eval '(append (list) (quote aaa))', 'aaa'
+test_eval '(append (list) (quote aaa))', make_symbol('aaa')
 
 test_eval '(reverse (list 1 2 3 4 5))', [5,4,3,2,1]
-test_eval '(reverse (quote ()))',[]
-
-test_eval '(list +)', "(<+>)"
+test_eval '(reverse (quote ()))', []
 
 test_eval '(list-tail (list 1 2 3 4 5) 3)',[4,5]
 test_eval '(list-ref (list 1 2 3 4 5) 3)', 4
@@ -194,4 +190,4 @@ puts "-----eqv?"
 test_eval '(begin (define x (list 2 1 0)) (list (eqv? x x) (eqv? x (list 2 1 0))))',[true,false]
 
 puts "-----case"
-test_eval '(case (+ 10 5) ((1 10 15) (quote first)) ((2 13 16) (quote second)) (else (quote else)))', "first"
+test_eval '(case (+ 10 5) ((1 10 15) (quote first)) ((2 13 16) (quote second)) (else (quote else)))', make_symbol("first")
