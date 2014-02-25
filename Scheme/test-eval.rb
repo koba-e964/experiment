@@ -86,16 +86,38 @@ test_eval '(if (set! x 3) x 1)', 3
 
 test_eval '(cond ((quote (1 3)) => (lambda (x) x)))', [1,3]
 
-puts "----- 4.1.3 Procedure calls"
+puts "--- 4.1 Primitive expression types:"
+puts "----- 4.1.1 Variable references:"
+test_eval '(define x 28) x', 28
+
+puts "----- 4.1.2 Literal expressions:"
+test_eval '(quote a)',make_symbol("a")
+test_eval '(quote #(1 2 3))',[1,2,3] # (ruby object -> vector) is not prepared
+test_eval '(quote (+ 1 2))',[make_symbol('+'),1,2]
+test_eval '\'a',make_symbol("a")
+test_eval '\'(+ 1 2)',[make_symbol('+'),1,2]
+
+# objects which are evaluated to themselves
+test_eval '"abcde"', "abcde"
+test_eval '1444', 1444
+test_eval '#t', true
+
+
+puts "----- 4.1.3 Procedure calls:"
 test_eval '((if #f + *) 3 4)', 12
 #environment
 test_eval '(define a 2) ((lambda (a) a)8) a', 2
 
-puts "----- 4.1.4 Procedures"
+puts "----- 4.1.4 Procedures:"
 test_eval '((lambda (x) (+ x x)) 4)', 8
 #environment
 test_eval '(define a 2) ((lambda (a) a)8)', 8
 
+puts "----- 4.1.5 Conditionals:"
+test_eval "(if (> 3 2) \"yes\" \"no\")","yes"
+
+puts "----- 4.1.6 Assignments:"
+test_eval '(define x 2) (+ x 1) (set! x 4) (+ x 1)', 5
 
 puts "----- 4.2.1 Conditionals"
 
