@@ -15,7 +15,7 @@ $rbscm_succs=0 #success
 def assert_equal(actual,exp)
 	$rbscm_tests+=1
 	if actual != exp
-		puts "expected:"+exp.to_s+", but actual:"+actual.to_s
+		$stderr.puts "expected:"+exp.to_s+", but actual:"+actual.to_s
 		return
 	end
 	$rbscm_succs+=1
@@ -25,15 +25,14 @@ def test_eval(expr,expected)
 	$rbscm_tests+=1
 	exp_s=ruby_to_SObj(expected)
 	begin
-			actual=run(expr)
+		actual=run(expr)
 		if actual != exp_s
-			puts "expr:"+expr+", expected:"+exp_s.to_s+", actual:"+actual.to_s
+			$stderr.puts "expr:"+expr+", expected:"+exp_s.to_s+", actual:"+actual.to_s
 		end
 		$rbscm_succs+=1
 		return
 	rescue => ex
-		puts "expr:"+expr+", expected:"+exp_s.to_s+", got:"
-		p ex
+		$stderr.puts "expr:"+expr+", expected:"+exp_s.to_s+", got:"+ex.inspect
 	end
 end
 
