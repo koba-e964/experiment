@@ -28,7 +28,7 @@ Keywords
 | section | status |
 | --- | --- |
 |4.1.1 Variable references|ok|
-|4.1.2 Literal expressions| abbreviation of quote("'") is not implemented|
+|4.1.2 Literal expressions|ok|
 |4.1.3 Procedure calls| ok |
 |4.1.4 Procedures| ok |
 |4.1.5 Conditionals| ok |

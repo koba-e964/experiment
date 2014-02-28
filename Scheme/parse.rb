@@ -219,6 +219,14 @@ module RbScmParse
 		end
 		return [make_vector(pool),sum+1]
 	end
+	def quote?(ary) # abbreviated quote "'"
+		return ary[0]=="'"
+	end
+	def parse_quote(ary)
+		quote?(ary) or raise 'not quote:'+ary.inspect
+		expr,len=parse_expr(ary[1...ary.size()])
+		return [ruby_to_SObj([syntax('quote'),expr]),1+len]
+	end
 	def parse_symbol_or_syntax_or_string(ary)
 		str=ary[0]
 		case
@@ -241,6 +249,8 @@ module RbScmParse
 			return parse_bool(ary)
 		when vector?(ary)
 			return parse_vector(ary)
+		when quote?(ary)
+			return parse_quote(ary)
 		end
 		return parse_symbol_or_syntax_or_string(ary)
 	end
