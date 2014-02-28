@@ -11,11 +11,14 @@ include RbScmParse
 
 $rbscm_tests=0
 $rbscm_succs=0 #success
+$rbscm_fails=0 #failure
+$rbscm_errors=0 #error
 
 def assert_equal(actual,exp)
 	$rbscm_tests+=1
 	if actual != exp
 		$stderr.puts "expected:"+exp.to_s+", but actual:"+actual.to_s
+		$rbscm_fails+=1
 		return
 	end
 	$rbscm_succs+=1
@@ -28,11 +31,14 @@ def test_eval(expr,expected)
 		actual=run(expr)
 		if actual != exp_s
 			$stderr.puts "expr:"+expr+", expected:"+exp_s.to_s+", actual:"+actual.to_s
+			$rbscm_fails+=1
+			return
 		end
 		$rbscm_succs+=1
 		return
 	rescue => ex
 		$stderr.puts "expr:"+expr+", expected:"+exp_s.to_s+", got:"+ex.inspect
+		$rbscm_errors+=1
 	end
 end
 
@@ -74,8 +80,9 @@ end
 def test_summary
 	t=$rbscm_tests
 	s=$rbscm_succs
-	f=t-s #failures
-	puts "Test:"+t.to_s+"     Success:"+s.to_s+"     Failure:"+f.to_s
+	f=$rbscm_fails #failures
+	e=$rbscm_errors
+	puts "Test:"+t.to_s+"     Success:"+s.to_s+"     Failure:"+f.to_s+"     Error:"+e.to_s
 end
 
 test_init
