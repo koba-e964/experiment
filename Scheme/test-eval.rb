@@ -98,7 +98,7 @@ test_eval '(define x 28) x', 28
 
 puts "----- 4.1.2 Literal expressions:"
 test_eval '(quote a)',make_symbol("a")
-test_eval '(quote #(1 2 3))',[1,2,3] # (ruby object -> vector) is not prepared
+test_eval '(quote #(1 2 3))',make_vector([make_int(1),make_int(2),make_int(3)]) # (ruby object -> vector) is not prepared
 test_eval '(quote (+ 1 2))',[make_symbol('+'),1,2]
 test_eval '\'a',make_symbol("a")
 test_eval '\'(+ 1 2)',[make_symbol('+'),1,2]
