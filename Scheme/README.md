@@ -33,6 +33,12 @@ Keywords
 |4.1.4 Procedures| ok |
 |4.1.5 Conditionals| ok |
 |4.1.6 Assignments| ok|
+| 4.2.1 Conditionals| ok|
+|4.2.2 Binding constructs| ok |
+|4.2.3 Sequencing| |
+|4.2.4 Iteration| ok|
+|4.2.5 Delayed evaluation| |
+|4.2.6 Quasiquotation| |
 |6.1 Equivalence predicates | |
 | 6.2.5 Numerical operations | supports only integers |
 | 6.2.6 Numerical input and output | not supported|

@@ -304,6 +304,11 @@ module RbScm
 		obj.set_syntax(syntax(name))
 		return obj
 	end
+	def make_lambdaobj(val)
+		obj=SObj.new()
+		obj.set_lambda(val)
+		return obj
+	end
 	def make_undef()
 		obj=SObj.new
 		obj.set_undef

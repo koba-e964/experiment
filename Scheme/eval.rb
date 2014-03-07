@@ -207,9 +207,14 @@ module RbScmEval
 		end
 		return res
 	end
-	def eval_let(cdr,local) #(let ((name init)...) expr), every initial value is evaluated before bindings.
+	def eval_let(cdr,local) #(let ((name init)...) expr...), every initial value is evaluated before bindings.
+		# or (let var ((name init)) expr...)
 		check_argc(cdr,2,true)
 		bindings,exprs=pair_divide(cdr)
+		if bindings.type==SYMBOL
+			b,exprs=pair_divide(exprs)
+			return eval_named_let(bindings,b,exprs,local)
+		end
 		varmap={}
 		while bindings.type!=NULL
 			b,bindings=pair_divide(bindings)
@@ -226,6 +231,27 @@ module RbScmEval
 			copy[k]=v
 		end
 		return eval_begin(exprs,copy)
+	end
+	def eval_named_let(varname,bindings,exprs,local)
+		#(let varname ((name init)...) exprs) -> varname<=(lambda (name...) exprs) (varname init...)
+		cp=local.copy
+		cp[varname.data]=make_undef()
+		params=[]
+		varmap=[]
+		while bindings.type!=NULL
+			b,bindings=pair_divide(bindings)
+			check_argc(b,2)
+			name,init=pair_divide(b)
+			init,_=pair_divide(init)
+			if params.index(name.data)!=nil
+				raise 'duplicate variables in let, name:'+name.data.to_s
+			end
+			params << name #evaluates in given environment
+			varmap << sobj_eval_sym(init,local) #evaluates in given environment
+		end
+		lc=LambdaClosure.new(make_list(params),exprs,cp)
+		cp[varname.data]=make_lambdaobj(lc)
+		lc[make_list(varmap)]
 	end
 	def eval_letstar(cdr,local) #(let* ((name init)...) expr), evaluation of initial values and bindings are done one after another.
 		check_argc(cdr,2,true)
@@ -375,12 +401,12 @@ class SymMap #map: ScmSymbol->(SObj or Proc or LambdaClosure)
 end
 class LambdaClosure
 	attr_reader :param,:exprs, :env
-	def initialize(param,exprs,env)
+	def initialize(param,exprs,env) #params: list, exprs: list
 		@param=param
 		@exprs=exprs
 		@env=env
 	end
-	def [](args) #evaluation
+	def [](args) #evaluation, args:list
 		argcopy=args
 		copy=env.copy
 		pr=param
