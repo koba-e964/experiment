@@ -155,6 +155,8 @@ test_eval <<EOS, [true,false,false]
 )
 EOS
 
+puts "----- 4.2.3 Sequencing:"
+test_eval '(define x 0) (begin (set! x 5) (+ x 1))' , 6
 
 puts "----- 4.2.4 Iteration:"
 # do
@@ -173,7 +175,15 @@ expr=<<EOS
 EOS
 test_eval expr, [[6,1,3],[-5,-2]]
 
+puts "----- 4.2.5 Delayed evaluation:"
+#tests are below (6.4 Control features)
 
+puts "----- 4.2.6 Quasiquotation:"
+test_eval '`(list ,(+ 1 2) 4)', [symbol("list"),3,4]
+test_eval '(let ((name \'a)) `(list ,name \',name))', run("'(list a (quote a))")
+test_eval '`(a ,(+ 1 2) ,@(map abs \'(4 -5 6)) b)', run("'(a 3 4 5 6 b)")
+test_eval '`((`foo\' ,(- 10 3)) ,@(cdr \'(c)) . ,(car \'(cons)))', run("'((foo 7) . cons)")
+test_eval '`#(10 5 ,(sqrt 4) ,@(map sqrt \'(16 9)) 8)', make_vector([make_int(10), make_int(5), make_int(2), make_int(4), make_int(3), make_int(8)])
 
 test_eval '(+ (abs 3) (abs -100000))', 3+100000
 
@@ -188,13 +198,6 @@ test_eval <<EOS, 16
 (define xx 4)
 (define f14 (lambda (zz) (+ xx zz)))
 (begin (set! xx 10) (f14 6))
-EOS
-
-test_eval <<EOS, 16
-(define xx 4)
-(define f14 (lambda (zz) (+ xx zz)))
-(define xx 10)
-(f14 6)
 EOS
 
 

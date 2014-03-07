@@ -35,7 +35,7 @@ Keywords
 |4.1.6 Assignments| ok|
 | 4.2.1 Conditionals| ok|
 |4.2.2 Binding constructs| ok |
-|4.2.3 Sequencing| |
+|4.2.3 Sequencing| ok |
 |4.2.4 Iteration| ok|
 |4.2.5 Delayed evaluation| |
 |4.2.6 Quasiquotation| |
