@@ -32,7 +32,7 @@ Keywords
 |4.1.3 Procedure calls| ok |
 |4.1.4 Procedures| ok |
 |4.1.5 Conditionals| ok |
-|4.1.6 Assignments| set! is wrong|
+|4.1.6 Assignments| ok|
 |6.1 Equivalence predicates | |
 | 6.2.5 Numerical operations | supports only integers |
 | 6.2.6 Numerical input and output | not supported|

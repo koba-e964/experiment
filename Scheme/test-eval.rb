@@ -42,18 +42,19 @@ def test_eval(expr,expected)
 	end
 end
 
-gl_map=SymMap.new()
-set_global_map(gl_map)
-add_initial_operator(gl_map)
+$gl_map=SymMap.new()
+set_global_map($gl_map)
+add_initial_operator($gl_map)
 
 def run(str)
 	tokens=tokenize(str)
 	pos=0
 	res=nil
+	env=$gl_map.copy()
 	while(pos<tokens.size)
 		#p [pos,tokens.size,tokens[pos...tokens.size]]
 		sobj,len=parse_expr(tokens[pos...tokens.size])
-		res=sobj_eval(sobj)
+		res=sobj_eval_sym(sobj,env)
 		pos+=len
 	end
 	return res
@@ -184,7 +185,7 @@ test_eval <<EOS, 10
 ((lambda (zz) (+ xx zz)) 6)
 EOS
 
-test_eval <<EOS, 10
+test_eval <<EOS, 16
 (define xx 4)
 (define f14 (lambda (zz) (+ xx zz)))
 (begin (set! xx 10) (f14 6))
