@@ -89,7 +89,6 @@ end
 test_init
 
 test_eval '(+ 1 2 3)', 6
-test_eval '(if (set! x 3) x 1)', 3
 
 test_eval '(cond ((quote (1 3)) => (lambda (x) x)))', [1,3]
 

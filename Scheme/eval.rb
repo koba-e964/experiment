@@ -145,12 +145,13 @@ module RbScmEval
 		end
 		return sobj_eval_sym(t,local)
 	end
-	#(varname expr), TODO FIXME this method defines variable if not defined.
+	#(varname expr)
 	def eval_set(cdr,local)
 		varname,expr=pair_divide(cdr)
 		expr,null=pair_divide(expr)
 		null.type==NULL or raise null.to_s+' is not null'
 		varname.type==SYMBOL or raise varname.to_s+' is not a symbol'
+		local.contains? varname.data or raise 'undefined variable:'+varname.to_s
 		local[varname.data]=sobj_eval_sym(expr,local)
 		return make_undef()
 	end
