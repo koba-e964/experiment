@@ -19,7 +19,11 @@ class ScmSymbol
 	@@charset=('0'.upto('9').reduce(:+))+('A'.upto('Z').reduce(:+))+('a'.upto('z').reduce(:+))
 	@@charset+="!$%&*+-./:<=>?@^_~"
 	@@initial=@@charset.clone.delete('0'.upto('9').reduce(:+))
-	def initialize(name)
+	def initialize(name,ss)
+		if ss #this constructor was called by string->symbol
+			@name=name #directly set the name
+			return
+		end
 		raise unless ScmSymbol::valid?(name)
 		@name=name.downcase
 	end
@@ -83,7 +87,7 @@ end
 
 module RbScm
 	def symbol(name)
-		return ScmSymbol.new(name)
+		return ScmSymbol.new(name, false)
 	end
 	def syntax(keyword)
 		return ScmSyntax.new(keyword)

@@ -675,7 +675,7 @@ module RbScmEval
 			check_argc(varargs,1)
 			a,_=pair_divide(varargs)
 			a.type==STRING or raise 'not a string:'+a.inspect
-			return make_symbol(a.data)
+			return ruby_to_SObj(ScmSymbol.new(a.data,true)) #directly calls the constructor of ScmSymbol
 		})
 	end
 end
