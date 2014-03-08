@@ -659,5 +659,23 @@ module RbScmEval
 			end
 			return ruby_to_SObj(a.object_id==b.object_id)
 		})
+		# 6.3.3 Symbols
+		reg_proc(symbol('symbol?'), lambda{|varargs|
+			check_argc(varargs,1)
+			a,_=pair_divide(varargs)
+			return make_bool(a.type==SYMBOL)
+		})
+		reg_proc(symbol('symbol->string'), lambda{|varargs|
+			check_argc(varargs,1)
+			a,_=pair_divide(varargs)
+			a.type==SYMBOL or raise 'not a symbol:'+a.inspect
+			return make_str(a.data.to_s)
+		})
+		reg_proc(symbol('string->symbol'), lambda{|varargs|
+			check_argc(varargs,1)
+			a,_=pair_divide(varargs)
+			a.type==STRING or raise 'not a string:'+a.inspect
+			return make_symbol(a.data)
+		})
 	end
 end

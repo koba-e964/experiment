@@ -260,6 +260,11 @@ module RbScm
 			return obj
 		end
 	end
+	def make_bool(val)
+		obj=SObj.new()
+		obj.set_bool(val)
+		return obj
+	end
 	def make_int(val)
 		obj=SObj.new()
 		obj.set_int(val)
