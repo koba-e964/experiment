@@ -269,6 +269,26 @@ test_eval '(assoc-general = 10 (quote ((1 4) (10 3) (2 10))))',[10,3]
 #improper list
 test_eval '(define imp-list-0 (quote (2 . 4))) imp-list-0', make_pair(make_int(2),make_int(4))
 
+puts "----- 6.3.3 Symbols:"
+# symbols?
 
+test_eval "(symbol? 'foo)",true
+test_eval "(symbol? (car '(a b)))",true
+test_eval '(symbol? "bar")', false
+test_eval "(symbol? 'nil)", true
+test_eval "(symbol? '())", false
+test_eval "(symbol? #f)", false
+
+# symbol->string
+test_eval "(symbol->string 'flying-fish)", "flying-fish"
+test_eval "(symbol->string 'Martin)", "martin" # lower case
+test_eval '(symbol->string (string->symbol "Malvina"))', "Malvina" #string->symbol->string, upper case to upper case
+
+# string->symbol
+test_eval "(eq? 'mISSISSIppi 'mississippi)", true
+#test_eval '(string->symbol "mISSISSIppi")', symbol("mISSISSIppi")
+test_eval '(eq? \'bitBlt (string->symbol "bitBlt"))', false
+test_eval "(eq? 'JollyWog (string->symbol (symbol->string 'JollyWog)))", true
+test_eval '(string=? "K. Harper, M.D." (symbol->string (string->symbol "K. Harper, M.D.")))', true
 test_summary
 
