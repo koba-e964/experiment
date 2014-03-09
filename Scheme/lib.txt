@@ -68,3 +68,26 @@
 (define (assv obj alist) (assoc-general eqv? obj alist))
 (define (assoc obj alist) (assoc-general equal? obj alist))
 
+(define (char=? arg1 arg2) (= (char->integer arg1) (char->integer arg2)))
+(define (char<? arg1 arg2) (< (char->integer arg1) (char->integer arg2)))
+(define (char>? arg1 arg2) (> (char->integer arg1) (char->integer arg2)))
+(define (char<=? arg1 arg2) (<= (char->integer arg1) (char->integer arg2)))
+(define (char>=? arg1 arg2) (>= (char->integer arg1) (char->integer arg2)))
+
+
+(define (*case-ignoring-int* chr) (let ((i (char->integer chr))) (if (<= 97 i 122) (- i 32) i)))
+
+(define (char-ci=? arg1 arg2) (= (*case-ignoring-int* arg1) (*case-ignoring-int* arg2)))
+(define (char-ci<? arg1 arg2) (< (*case-ignoring-int* arg1) (*case-ignoring-int* arg2)))
+(define (char-ci>? arg1 arg2) (> (*case-ignoring-int* arg1) (*case-ignoring-int* arg2)))
+(define (char-ci<=? arg1 arg2) (<= (*case-ignoring-int* arg1) (*case-ignoring-int* arg2)))
+(define (char-ci>=? arg1 arg2) (>= (*case-ignoring-int* arg1) (*case-ignoring-int* arg2)))
+
+(define (char-alphabetic? chr) (let ((i (char->integer chr))) (or (<= #x41 i #x5a) (<= #x61 i #x7a))))
+(define (char-numeric? chr) (<= #x30 (char->integer chr) #x39))
+(define (char-whitespace? chr) (<= (char->integer chr) #x20))
+(define (char-upper-case? chr) (<= #x41 (char->integer chr) #x5a))
+(define (char-lower-case? chr) (<= #x61 (char->integer chr) #x7a))
+
+(define (char-upcase chr) (integer->char (*case-ignoring-int* chr)))
+(define (char-downcase chr) (let ((i (char->integer chr))) (integer->char (if (<= #x41 i #x5a) (+ i #x20) i))))

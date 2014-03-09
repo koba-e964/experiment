@@ -51,7 +51,7 @@ Keywords
 |6.3.1 Booleans | ok|
 |6.3.2 Pairs and lists | ok |
 |6.3.3 Symbols |some tests fail because of the lack of eq? and string=?|
-|6.3.4 Characters |not supported|
+|6.3.4 Characters |ok|
 |6.3.5 Strings |buggy|
 |6.3.6 Vectors |  |
 |6.4 Control features| |

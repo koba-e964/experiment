@@ -341,10 +341,15 @@ test_eval '(char-whitespace? #\\x0d)', true
 test_eval '(char-whitespace? #\\x0c)', true
 
 
-test_eval '(char-uppercase? #\\a)', false
-test_eval '(char-uppercase? #\\A)', false
-test_eval '(char-uppercase? #\\0)', false
-test_eval '(char-uppercase? #\\space)', true
+test_eval '(char-upper-case? #\\a)', false
+test_eval '(char-upper-case? #\\A)', true
+test_eval '(char-upper-case? #\\0)', false
+test_eval '(char-upper-case? #\\space)', false
+
+test_eval '(char-lower-case? #\\a)', true
+test_eval '(char-lower-case? #\\A)', false
+test_eval '(char-lower-case? #\\0)', false
+test_eval '(char-lower-case? #\\space)', false
 
 # char-upcase char-downcase
 test_eval '(char-upcase #\\a)', make_char('A')
