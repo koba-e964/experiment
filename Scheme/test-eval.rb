@@ -290,5 +290,70 @@ test_eval "(eq? 'mISSISSIppi 'mississippi)", true
 test_eval '(eq? \'bitBlt (string->symbol "bitBlt"))', false
 test_eval "(eq? 'JollyWog (string->symbol (symbol->string 'JollyWog)))", true
 test_eval '(string=? "K. Harper, M.D." (symbol->string (string->symbol "K. Harper, M.D.")))', true
+
+puts "----- 6.3.4 Characters:"
+
+test_eval '#\\a', make_char('a')
+test_eval '#\\A', make_char('A')
+test_eval '#\\ ', make_char(' ')
+test_eval '#\\space', make_char(' ')
+test_eval '#\\newline', make_char("\n")
+test_eval '#\\x61', make_char(61.chr)
+
+#char->integer
+test_eval '(char->integer #\\space)', 32
+
+#integer->char
+test_eval '(integer->char #x61)', make_char('a')
+
+# comparison
+
+test_eval '(char=? #\\A #\\a)', false
+test_eval '(char<? #\\A #\\B)', true
+test_eval '(char<? #\\c #\\b)', false
+test_eval '(char>? #\\c #\\d)', false
+test_eval '(char<=? #\\c #\\c)', true
+test_eval '(char>=? #\\c #\\c)', true
+
+test_eval '(char-ci=? #\\A #\\a)', true
+test_eval '(char-ci<? #\\A #\\b)', true
+test_eval '(char-ci<? #\\c #\\B)', false
+test_eval '(char-ci>? #\\c #\\D)', false
+test_eval '(char-ci<=? #\\c #\\C)', true
+test_eval '(char-ci>=? #\\C #\\c)', true
+
+test_eval '(char-alphabetic? #\\a)', true
+test_eval '(char-alphabetic? #\\A)', true
+test_eval '(char-alphabetic? #\\0)', false
+test_eval '(char-alphabetic? #\\space)', false
+
+test_eval '(char-numeric? #\\a)', false
+test_eval '(char-numeric? #\\A)', false
+test_eval '(char-numeric? #\\0)', true
+test_eval '(char-numeric? #\\space)', false
+
+test_eval '(char-whitespace? #\\a)', false
+test_eval '(char-whitespace? #\\A)', false
+test_eval '(char-whitespace? #\\0)', false
+test_eval '(char-whitespace? #\\space)', true
+test_eval '(char-whitespace? #\\newline)', true
+test_eval '(char-whitespace? #\\x0d)', true
+test_eval '(char-whitespace? #\\x0c)', true
+
+
+test_eval '(char-uppercase? #\\a)', false
+test_eval '(char-uppercase? #\\A)', false
+test_eval '(char-uppercase? #\\0)', false
+test_eval '(char-uppercase? #\\space)', true
+
+# char-upcase char-downcase
+test_eval '(char-upcase #\\a)', make_char('A')
+test_eval '(char-upcase #\\B)', make_char('B')
+test_eval '(char-upcase #\\0)', make_char('0')
+test_eval '(char-downcase #\\a)', make_char('a')
+test_eval '(char-downcase #\\B)', make_char('b')
+test_eval '(char-downcase #\\0)', make_char('0')
+
+
 test_summary
 

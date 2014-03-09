@@ -168,7 +168,7 @@ class SObj
 			return "("+data[0].to_s()+" . "+data[1].to_s()+")"
 		end
 		if type==CHAR
-			return "@\\"+data.chr
+			return "#\\"+data.chr
 		end
 		if type==STRING
 			return "\""+data+"\""
@@ -277,6 +277,11 @@ module RbScm
 	def make_str(val)
 		obj=SObj.new()
 		obj.set_str(val)
+		return obj
+	end
+	def make_char(val)
+		obj=SObj.new()
+		obj.set_char(val)
 		return obj
 	end
 	def make_null()
