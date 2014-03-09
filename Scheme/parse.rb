@@ -93,6 +93,9 @@ module RbScmTokenize
 				next
 			end
 			if ch.ord<=32 #space
+				if cur=='#\\' # character literal
+					cur+=ch # space
+				end
 				ary+=[cur]
 				cur=''
 				ptr+=1
@@ -166,6 +169,37 @@ module RbScmParse
 			sum=radix*sum+n
 		end
 		return [ruby_to_SObj(sum*sgn),1]
+	end
+	def char?(ary)
+		str=ary[0]
+		return str[0..1]=='#\\'
+	end
+	def parse_char(ary)
+		char?(ary) or raise 'not char'
+		str=ary[0]
+		c=str[2...str.size()]
+		if c.size()==1 # a letter
+			return [make_char(c),1]
+		end
+		# c is a character name or hexadecimal
+		if c[0]=='x' #hexadecimal
+			i=c[1..c.size()].to_i(16)
+			if i<0 or i>=128 # out of ascii code
+				raise 'out of range:'+str
+			end
+			return [make_char(i.chr),1]
+		end
+		# c is a character name (space/newline)
+		t=nil
+		case c
+		when 'space'
+			t=' '
+		when 'newline'
+			t=10.chr
+		else
+			raise 'invalid character name:'+str
+		end
+		return [make_char(t),1]
 	end
 	def list?(ary)
 		ary[0]=='('
@@ -245,6 +279,8 @@ module RbScmParse
 			return parse_list(ary)
 		when num?(ary)
 			return parse_num(ary)
+		when char?(ary)
+			return parse_char(ary)
 		when bool?(ary)
 			return parse_bool(ary)
 		when vector?(ary)

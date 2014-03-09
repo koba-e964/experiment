@@ -87,7 +87,7 @@ module RbScmEval
 				return (func.data)[args]
 			end
 			raise 'neiter Proc nor LambdaClosure'
-		when INT, STRING, SYNTAX, BOOL
+		when INT, STRING, SYNTAX, BOOL, CHAR
 			return sobj.clone
 		when SYMBOL
 			res=local[sobj.data]

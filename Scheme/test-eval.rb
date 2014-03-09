@@ -298,7 +298,7 @@ test_eval '#\\A', make_char('A')
 test_eval '#\\ ', make_char(' ')
 test_eval '#\\space', make_char(' ')
 test_eval '#\\newline', make_char("\n")
-test_eval '#\\x61', make_char(61.chr)
+test_eval '#\\x61', make_char(0x61.chr)
 
 #char->integer
 test_eval '(char->integer #\\space)', 32
