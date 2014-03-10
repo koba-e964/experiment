@@ -399,7 +399,7 @@ test_eval "(vector-length (vector (+ 2 3) 4))", 2
 test_eval "(vector-ref '#(1 1 2 3 5 8 13 21) 5)", 8
 
 # vector-set!
-test_eval <<EOS, parse_expr(tokenize('#(0 ("Sue" "Sue") "Anna")'))
+test_eval <<EOS, parse_expr(tokenize('#(0 ("Sue" "Sue") "Anna")'))[0]
 (let ((vec (vector 0 '(2 2 2 2) "Anna")))
   (vector-set! vec 1 '("Sue" "Sue"))
   vec)

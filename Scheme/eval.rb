@@ -721,5 +721,21 @@ module RbScmEval
 			vct.type==VECTOR or raise 'not a vector:'+vct.to_s
 			return make_int(vct.data.size())
 		})
+		reg_proc(symbol('vector-ref'), lambda{|v2|
+			check_argc(v2,2)
+			vct,r=pair_divide(v2)
+			ind,_=pair_divide(r)
+			(vct.type==VECTOR and ind.type==INT) or raise 'illegal arguments:(vector-ref '
+			return vct.data[ind.data]
+		})
+		reg_proc(symbol('vector-set!'), lambda{|v3|
+			check_argc(v3,3)
+			vct,r1=pair_divide(v3)
+			ind,r2=pair_divide(r1)
+			elem,_=pair_divide(r2)
+			(vct.type==VECTOR and ind.type==INT) or raise 'illegal arguments:(vector-ref '
+			vct.data[ind.data]=elem
+			return make_undef()
+		})
 	end
 end
