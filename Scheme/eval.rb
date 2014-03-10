@@ -690,5 +690,21 @@ module RbScmEval
 			val=a.data.chr
 			return make_char(val)
 		})
+		reg_proc(symbol('vector?'), lambda{|v1|
+			check_argc(v1,1)
+			vct,_=pair_divide(v1)
+			return make_bool(vct.type==VECTOR)
+		})
+		reg_proc(symbol('make-vector'), lambda{|args|
+			check_argc(args,1,true)
+			k,rest=pair_divide(args)
+			fill=make_undef()
+			if(rest.type!=NULL)
+				fill,_=pair_divide(rest)
+			end
+			#[fill, fill, ... , fill] (k times)
+			k.type==INT or raise 'k is not an integer:'+k.to_s
+			return make_vector(Array.new(k.data,fill))
+		})
 	end
 end

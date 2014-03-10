@@ -42,6 +42,23 @@ def test_eval(expr,expected)
 	end
 end
 
+def test_error(expr,msg)
+	$rbscm_tests+=1
+	begin
+		actual=run(expr)
+		$stderr.puts "expr:"+expr+" should raise an error:"+msg+", but actual:"+actual.to_s
+		$rbscm_fails+=1
+		return
+	rescue => ex
+		if(ex.to_s != msg)
+			$stderr.puts "expr:"+expr+"raised an error:"+ex.to_s+", but expected:"+msg
+			$rbscm_errors+=1
+		else
+			$rbscm_succs+=1
+		end
+	end
+end
+
 $gl_map=SymMap.new()
 set_global_map($gl_map)
 add_initial_operator($gl_map)
@@ -360,5 +377,40 @@ test_eval '(char-downcase #\\B)', make_char('b')
 test_eval '(char-downcase #\\0)', make_char('0')
 
 
+puts "----- 6.3.6 Vectors:"
+test_eval "'#(0 (2 2 2 2) \"Anna\")", make_vector([make_int(0),ruby_to_SObj([2,2,2,2]),make_str("Anna")])
+# vector?
+test_eval "(vector? '#(0 (2 2 2 2) \"Anna\"))", true
+test_eval "(vector? (list 2 3 4))", false
+
+# make-vector
+test_eval '(make-vector 10)', make_vector(Array.new(10,make_undef()))
+test_eval '(make-vector 10 "TestString")', make_vector(Array.new(10,make_str("TestString")))
+
+# vector
+test_eval "(vector 'a 'b 'c)", make_vector([make_symbol('a'),make_symbol('b'), make_symbol('c')])
+
+# vector-length
+test_eval "(vector-length (vector))", 0
+test_eval "(vector-length (vector (+ 2 3) 4))", 2
+
+# vector-ref
+
+test_eval "(vector-ref '#(1 1 2 3 5 8 13 21) 5)", 8
+
+# vector-set!
+test_eval <<EOS, parse_expr(tokenize('#(0 ("Sue" "Sue") "Anna")'))
+(let ((vec (vector 0 '(2 2 2 2) "Anna")))
+  (vector-set! vec 1 '("Sue" "Sue"))
+  vec)
+EOS
+
+test_error '(vector-set! \'#(0 1 2) 1 "doe")', 'vector-set! on constant vector'
+
+# vector->list
+test_eval '(vector->list \'#(dah dah didah))', run("'(dah dah didah)")
+
+# list->vector
+test_eval 'list->vector \'(dididit dah))', run("'#(dididit dah)")
 test_summary
 
