@@ -706,5 +706,20 @@ module RbScmEval
 			k.type==INT or raise 'k is not an integer:'+k.to_s
 			return make_vector(Array.new(k.data,fill))
 		})
+		reg_proc(symbol('vector'), lambda{|args|
+			check_argc(args,0,true)
+			ary=[]
+			while args.type!=NULL
+				val,args=pair_divide(args)
+				ary << val
+			end
+			return make_vector(ary)
+		})
+		reg_proc(symbol('vector-length'), lambda{|v1|
+			check_argc(v1,1)
+			vct,_=pair_divide(v1)
+			vct.type==VECTOR or raise 'not a vector:'+vct.to_s
+			return make_int(vct.data.size())
+		})
 	end
 end
