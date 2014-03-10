@@ -86,7 +86,7 @@ module RbScmEval
 			if func.type==PROC || func.type==LAMBDA
 				return (func.data)[args]
 			end
-			raise 'neiter Proc nor LambdaClosure'
+			raise 'neiter Proc nor LambdaClosure:'+func.inspect
 		when INT, STRING, SYNTAX, BOOL, CHAR
 			return sobj.clone
 		when SYMBOL
@@ -693,7 +693,7 @@ module RbScmEval
 		reg_proc(symbol('vector?'), lambda{|v1|
 			check_argc(v1,1)
 			vct,_=pair_divide(v1)
-			return make_bool(vct.type==VECTOR)
+			return make_bool(vct.type==VECTOR || vct.type==CONST_VECTOR)
 		})
 		reg_proc(symbol('make-vector'), lambda{|args|
 			check_argc(args,1,true)
@@ -718,14 +718,14 @@ module RbScmEval
 		reg_proc(symbol('vector-length'), lambda{|v1|
 			check_argc(v1,1)
 			vct,_=pair_divide(v1)
-			vct.type==VECTOR or raise 'not a vector:'+vct.to_s
+			vct.type==VECTOR || vct.type==CONST_VECTOR or raise 'not a vector:'+vct.to_s
 			return make_int(vct.data.size())
 		})
 		reg_proc(symbol('vector-ref'), lambda{|v2|
 			check_argc(v2,2)
 			vct,r=pair_divide(v2)
 			ind,_=pair_divide(r)
-			(vct.type==VECTOR and ind.type==INT) or raise 'illegal arguments:(vector-ref '
+			((vct.type==VECTOR || vct.type==CONST_VECTOR) and ind.type==INT) or raise 'illegal arguments:(vector-ref '+vct.to_s+' '+ind.to_s+')'
 			return vct.data[ind.data]
 		})
 		reg_proc(symbol('vector-set!'), lambda{|v3|
@@ -733,14 +733,17 @@ module RbScmEval
 			vct,r1=pair_divide(v3)
 			ind,r2=pair_divide(r1)
 			elem,_=pair_divide(r2)
-			(vct.type==VECTOR and ind.type==INT) or raise 'illegal arguments:(vector-ref '
+			if(vct.type==CONST_VECTOR)
+				raise 'vector-set! on constant vector'
+			end
+			(vct.type==VECTOR and ind.type==INT) or raise 'illegal arguments:(vector-ref '+vct.to_s+' '+ind.to_s+' '+elem.to_s+')'
 			vct.data[ind.data]=elem
 			return make_undef()
 		})
 		reg_proc(symbol('vector->list'), lambda{|v1|
 			check_argc(v1,1)
 			vct,_=pair_divide(v1)
-			vct.type==VECTOR or raise 'not a vector:'+vct.to_s
+			vct.type==VECTOR || vct.type==CONST_VECTOR or raise 'not a vector:'+vct.to_s
 			return make_list(vct.data)
 		})
 		reg_proc(symbol('list->vector'), lambda{|args|

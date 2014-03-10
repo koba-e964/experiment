@@ -11,6 +11,7 @@ module Kind
 	UNDEF=10
 	PROC=11
 	LAMBDA=12
+	CONST_VECTOR=13 # constant vector, unmodifiable
 end
 
 class ScmSymbol
@@ -140,6 +141,10 @@ class SObj
 		@type=VECTOR
 		@data=val
 	end
+	def set_const_vector(val)
+		@type=CONST_VECTOR
+		@data=val
+	end
 	def set_undef()
 		@type=UNDEF
 		@data=nil
@@ -182,7 +187,7 @@ class SObj
 		if type==SYMBOL || type==SYNTAX
 			return data.to_s
 		end
-		if type==VECTOR
+		if type==VECTOR or type==CONST_VECTOR
 			str='#('
 			for el in data
 				str+=el.to_s
@@ -306,6 +311,11 @@ module RbScm
 	def make_vector(elem)
 		obj=SObj.new
 		obj.set_vector(elem)
+		return obj
+	end
+	def make_const_vector(elem)
+		obj=SObj.new
+		obj.set_const_vector(elem)
 		return obj
 	end
 	def make_symbol(name)

@@ -251,7 +251,7 @@ module RbScmParse
 			pool+=[sobj]
 			sum+=ind
 		end
-		return [make_vector(pool),sum+1]
+		return [make_const_vector(pool),sum+1]
 	end
 	def quote?(ary) # abbreviated quote "'"
 		return ary[0]=="'"

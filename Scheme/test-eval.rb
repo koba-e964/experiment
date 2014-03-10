@@ -115,7 +115,7 @@ test_eval '(define x 28) x', 28
 
 puts "----- 4.1.2 Literal expressions:"
 test_eval '(quote a)',make_symbol("a")
-test_eval '(quote #(1 2 3))',make_vector([make_int(1),make_int(2),make_int(3)]) # (ruby object -> vector) is not prepared
+test_eval '(quote #(1 2 3))',make_const_vector([make_int(1),make_int(2),make_int(3)]) # (ruby object -> vector) is not prepared
 test_eval '(quote (+ 1 2))',[make_symbol('+'),1,2]
 test_eval '\'a',make_symbol("a")
 test_eval '\'(+ 1 2)',[make_symbol('+'),1,2]
@@ -378,7 +378,7 @@ test_eval '(char-downcase #\\0)', make_char('0')
 
 
 puts "----- 6.3.6 Vectors:"
-test_eval "'#(0 (2 2 2 2) \"Anna\")", make_vector([make_int(0),ruby_to_SObj([2,2,2,2]),make_str("Anna")])
+test_eval "'#(0 (2 2 2 2) \"Anna\")", make_const_vector([make_int(0),ruby_to_SObj([2,2,2,2]),make_str("Anna")])
 # vector?
 test_eval "(vector? '#(0 (2 2 2 2) \"Anna\"))", true
 test_eval "(vector? (list 2 3 4))", false
@@ -399,7 +399,7 @@ test_eval "(vector-length (vector (+ 2 3) 4))", 2
 test_eval "(vector-ref '#(1 1 2 3 5 8 13 21) 5)", 8
 
 # vector-set!
-test_eval <<EOS, parse_expr(tokenize('#(0 ("Sue" "Sue") "Anna")'))[0]
+test_eval <<EOS, run('(vector 0 \'("Sue" "Sue") "Anna")')
 (let ((vec (vector 0 '(2 2 2 2) "Anna")))
   (vector-set! vec 1 '("Sue" "Sue"))
   vec)
@@ -411,6 +411,6 @@ test_error '(vector-set! \'#(0 1 2) 1 "doe")', 'vector-set! on constant vector'
 test_eval '(vector->list \'#(dah dah didah))', run("'(dah dah didah)")
 
 # list->vector
-test_eval '(list->vector \'(dididit dah))', run("'#(dididit dah)")
+test_eval '(list->vector \'(dididit dah))', run("(vector 'dididit 'dah)")
 test_summary
 
