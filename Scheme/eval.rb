@@ -737,5 +737,21 @@ module RbScmEval
 			vct.data[ind.data]=elem
 			return make_undef()
 		})
+		reg_proc(symbol('vector->list'), lambda{|v1|
+			check_argc(v1,1)
+			vct,_=pair_divide(v1)
+			vct.type==VECTOR or raise 'not a vector:'+vct.to_s
+			return make_list(vct.data)
+		})
+		reg_proc(symbol('list->vector'), lambda{|args|
+			check_argc(args,1)
+			args,_=pair_divide(args)
+			ary=[]
+			while args.type!=NULL
+				val,args=pair_divide(args)
+				ary << val
+			end
+			return make_vector(ary)
+		})
 	end
 end

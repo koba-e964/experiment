@@ -411,6 +411,6 @@ test_error '(vector-set! \'#(0 1 2) 1 "doe")', 'vector-set! on constant vector'
 test_eval '(vector->list \'#(dah dah didah))', run("'(dah dah didah)")
 
 # list->vector
-test_eval 'list->vector \'(dididit dah))', run("'#(dididit dah)")
+test_eval '(list->vector \'(dididit dah))', run("'#(dididit dah)")
 test_summary
 
