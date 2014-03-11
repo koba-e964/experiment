@@ -227,6 +227,16 @@ test_eval ' (let ((x \'(a))) (eq? x x))', true
 test_eval '(eq? \'() \'())', true
 test_eval "(eq? (list 'a) (list 'a))", false
 
+# equal?
+
+test_eval "(equal? 'a 'a)", true
+test_eval "(equal? '(a) '(a))", true
+test_eval "(equal? '(a (b) c) '(a (b) c))", true
+test_eval "(equal? 2 2)", true
+test_eval "(equal? 2 3)", false
+test_eval "(equal? (make-vector 5 'a) (make-vector 5 'a))", true
+
+
 puts "----- 6.2.4 numerical constants:"
 test_eval '(quote (#b1010 #o777 #d10000 #xffff))', [10,0777,10000,0xffff]
 test_eval '(quote (-100 #x-ffff))', [-100,-0xffff]
