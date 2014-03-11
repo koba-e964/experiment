@@ -91,3 +91,6 @@
 
 (define (char-upcase chr) (integer->char (*case-ignoring-int* chr)))
 (define (char-downcase chr) (let ((i (char->integer chr))) (integer->char (if (<= #x41 i #x5a) (+ i #x20) i))))
+
+(define (eq? a b) (eqv? a b))
+

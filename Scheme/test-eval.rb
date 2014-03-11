@@ -223,6 +223,10 @@ test_eval '(eqv? (quote a) (quote a))', true
 test_eval '(eqv? (list 1) (list 1))', false
 test_eval '(begin (define x (list 2 1 0)) (list (eqv? x x) (eqv? x (list 2 1 0))))', [true,false]
 
+test_eval ' (let ((x \'(a))) (eq? x x))', true
+test_eval '(eq? \'() \'())', true
+test_eval "(eq? (list 'a) (list 'a))", false
+
 puts "----- 6.2.4 numerical constants:"
 test_eval '(quote (#b1010 #o777 #d10000 #xffff))', [10,0777,10000,0xffff]
 test_eval '(quote (-100 #x-ffff))', [-100,-0xffff]
