@@ -41,7 +41,7 @@ Keywords
 |4.2.6 Quasiquotation| |
 |4.3.1 Binding constructs for syntactic keywords| |
 |4.3.2 Pattern language| |
-|6.1 Equivalence predicates | eq?, eqv? is implemented|
+|6.1 Equivalence predicates |ok|
 |6.2.1 Numerical types| |
 |6.2.2 Exactness| |
 |6.2.3 Implementation restrictions| |

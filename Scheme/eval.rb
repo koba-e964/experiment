@@ -659,6 +659,12 @@ module RbScmEval
 			end
 			return ruby_to_SObj(a.object_id==b.object_id)
 		})
+		reg_proc(symbol('equal?'),lambda{|varargs|
+			check_argc(varargs,2)
+			a,rest=pair_divide(varargs)
+			b,_=pair_divide(rest)
+			return scm_equal?(a, b)
+		})
 		# 6.3.3 Symbols
 		reg_proc(symbol('symbol?'), lambda{|varargs|
 			check_argc(varargs,1)
@@ -756,5 +762,39 @@ module RbScmEval
 			end
 			return make_vector(ary)
 		})
+	end
+	def scm_equal?(a, b)
+		at=a.type
+		bt=b.type
+		if at==CONST_VECTOR
+			at=VECTOR
+		end
+		if bt==CONST_VECTOR
+			bt=VECTOR
+		end
+		if at!=bt
+			return make_bool(false)
+		end
+		case at
+		when NULL
+			return make_bool(true)
+		when PAIR
+			c,d=pair_divide(a)
+			e,f=pair_divide(b)
+			return scm_equal?(c,e) && scm_equal?(d,f)
+		when VECTOR
+			if a.data.size()!= b.data.size()
+				return make_bool(false)
+			end
+			for i in 0...a.data.size()
+				if not scm_equal?(a.data[i],b.data[i])
+					return make_bool(false)
+				end
+			end
+			return make_bool(true)
+		when BOOL, SYMBOL, INT, CHAR, STRING
+			return make_bool(a.data==b.data)
+		end
+		raise 'unreachable'
 	end
 end
