@@ -684,6 +684,11 @@ module RbScmEval
 			return ruby_to_SObj(ScmSymbol.new(a.data,true)) #directly calls the constructor of ScmSymbol
 		})
 		# 6.3.4 Characters
+		reg_proc(symbol('char?'), lambda{|varargs|
+			check_argc(varargs, 1)
+			a, _ = pair_divide(varargs)
+			return make_bool(a.type==CHAR)
+		})
 		reg_proc(symbol('char->integer'), lambda{|varargs|
 			check_argc(varargs,1)
 			a,_=pair_divide(varargs)

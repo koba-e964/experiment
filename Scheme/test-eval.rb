@@ -331,6 +331,10 @@ test_eval '#\\space', make_char(' ')
 test_eval '#\\newline', make_char("\n")
 test_eval '#\\x61', make_char(0x61.chr)
 
+# char?
+test_eval "(char? #\\a)", true
+test_eval "(char? 1)", false
+
 #char->integer
 test_eval '(char->integer #\\space)', 32
 
