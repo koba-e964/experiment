@@ -1,8 +1,9 @@
 module HaskCalc where
-import Control.Applicative hiding ((<|>))
-import Data.Map hiding (foldl,foldl')
+import Control.Applicative ((<$>), (*>), (<*), some)
+import Control.Monad.Trans.State.Strict ()
 import Data.List (foldl')
-import Text.ParserCombinators.Parsec
+import Data.Map (Map, (!), keys, fromList)
+import Text.ParserCombinators.Parsec ((<|>), Parser, char, digit, getInput, parse, pzero, setInput, string, try)
 
 number:: Parser Double
 number=do
