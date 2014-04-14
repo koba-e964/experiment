@@ -6,6 +6,7 @@ import Data.List (foldl')
 import Data.Map (Map, (!), empty, keys, fromList)
 import qualified Data.Map as Map
 import Debug.Trace (trace)
+import Text.Parsec.Char (spaces)
 import Text.Parsec.Prim (ParsecT, (<?>), getState, parserFail, parserZero, putState, runParsecT, try, runPT)
 import Text.ParserCombinators.Parsec ((<|>), Parser, char, digit, getInput, letter, parse, pzero, setInput, string)
 
@@ -77,7 +78,18 @@ paren_expr :: Monad m => MParser Table m Double
 paren_expr = char '(' *> expr <* char ')'
 
 expr :: Monad m => MParser Table m Double
-expr = additive <|> paren_expr
+expr = assignment <|> additive <|> paren_expr
+
+assignment :: Monad m => MParser Table m Double
+assignment = do
+  name <- identifier
+  spaces
+  char '='
+  spaces
+  val <- expr
+  tbl <- getState
+  putState $ Map.insert name val tbl
+  return val
 
 eval :: Monad m => String -> m (Either String Double)
 eval str = do
