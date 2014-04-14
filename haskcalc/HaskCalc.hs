@@ -6,7 +6,7 @@ import Data.List (foldl')
 import Data.Map (Map, (!), empty, keys, fromList)
 import qualified Data.Map as Map
 import Debug.Trace (trace)
-import Text.Parsec.Prim (ParsecT, getState, parserZero, putState, runParsecT, try, runPT)
+import Text.Parsec.Prim (ParsecT, (<?>), getState, parserFail, parserZero, putState, runParsecT, try, runPT)
 import Text.ParserCombinators.Parsec ((<|>), Parser, char, digit, getInput, letter, parse, pzero, setInput, string)
 
 type MParser u m a= ParsecT String u m a
@@ -15,23 +15,30 @@ type Table = Map String Double
 -- Double value represented as String
 number :: Monad m => MParser u m Double
 number = do
-	x <- some (digit <|> char '.' <|> char 'e' <|> char '-')
+	x <- try (some (digit <|> char '.' <|> char 'e' <|> char '-')) <?> "not a number"
 	let{pair = reads x;}
 	case pair of
-		[] -> parserZero;
+		[] -> parserFail "parse failure on number";
 		[(x, rest)]->do
 			gi <- getInput
 			setInput $ rest ++ gi
 			return x;
 
+-- identifier
+
+identifier :: Monad m => MParser Table m String
+identifier = do
+  name <- try ((:) <$> letter <*> many (digit <|> letter)) <?> "an identifier"
+  return name
+
 -- variable
 variable :: Monad m => MParser Table m Double
 variable = do
-  name <- try $ (:) <$> letter <*> many (digit <|> letter)
+  name <- identifier
   tbl <- getState
   let res = Map.lookup name tbl
   case res of
-    Nothing -> parserZero
+    Nothing -> return $ error $ "unbound variable:"++ name -- parsing succeeds, but fetching fails.
     Just v  -> return $! v
 
 type DoubleBiop = Double -> Double -> Double
