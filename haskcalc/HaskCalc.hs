@@ -78,7 +78,7 @@ paren_expr :: Monad m => MParser Table m Double
 paren_expr = char '(' *> expr <* char ')'
 
 expr :: Monad m => MParser Table m Double
-expr = assignment <|> additive <|> paren_expr
+expr = try assignment <|> additive <|> paren_expr
 
 assignment :: Monad m => MParser Table m Double
 assignment = do
