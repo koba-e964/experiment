@@ -1,6 +1,6 @@
 module HaskCalc where
 import Control.Applicative ((<$>), (*>), (<*), (<*>), many, some)
-import Control.Monad (liftM)
+import Control.Monad (forM, liftM)
 import Control.Monad.State.Class (get, put)
 import Control.Monad.Trans.State.Strict (runStateT)
 import Data.List (foldl')
@@ -107,3 +107,6 @@ evalString str = do
     Left x  -> Left (show x)
     Right v -> Right v
 
+-- evalStrings sequentially evaluates expressions. Note that modifications of variables affect later expressions.
+evalStrings :: Monad m => [String] -> Var m [Either String Double]
+evalStrings strls = forM strls evalString

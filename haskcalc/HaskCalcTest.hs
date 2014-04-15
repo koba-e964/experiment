@@ -1,4 +1,6 @@
 import Control.Monad.Identity (Identity, runIdentity)
+import Control.Monad.Trans.State.Strict (runStateT)
+import qualified Data.Map as Map
 import Test.HUnit
 import HaskCalc
 main :: IO ()
@@ -24,7 +26,7 @@ actual ~?=== expected = TestCase (assertDoubleEqual ("expected:"++(show expected
 
 -- tests for eval0
 
-alltests=TestList [tests_muladd, tests_rem, tests_exp, tests_paren]
+alltests=TestList [tests_muladd, tests_rem, tests_exp, tests_paren, tests_evalStrings]
 -- tests for +-*/
 isLeft :: Either a b->Bool
 isLeft (Left _)=True
@@ -53,5 +55,7 @@ tests_paren=TestList [
 	eval0 "3+2*(5-9)" ~?= Right (-5),
 	eval0 "(3.5*4)-11" ~?= Right 3]
 
-
+-- tests for evalStrings
+tests_evalStrings = TestList [
+  (fst . runIdentity) (runStateT (evalStrings ["test=4", "var=3", "test*var"]) Map.empty) ~?= [Right 4.0, Right 3.0, Right 12.0]]
 
