@@ -1,6 +1,6 @@
 module Var where
 import Control.Monad.Trans (lift)
-import Control.Monad.Trans.State.Strict (StateT, get, put, runStateT)
+import Control.Monad.Trans.State.Lazy (StateT, get, put, runStateT)
 import Data.List (foldl')
 import Data.Map (Map, empty, insert)
 import qualified Data.Map as Map

@@ -1,5 +1,5 @@
 import Control.Monad.Identity (Identity, runIdentity)
-import Control.Monad.Trans.State.Strict (runStateT)
+import Control.Monad.Trans.State.Lazy (runStateT)
 import qualified Data.Map as Map
 import Test.HUnit
 import HaskCalc

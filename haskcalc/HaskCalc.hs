@@ -2,7 +2,7 @@ module HaskCalc where
 import Control.Applicative ((<$>), (*>), (<*), (<*>), many, some)
 import Control.Monad (forM, liftM)
 import Control.Monad.State.Class (get, put)
-import Control.Monad.Trans.State.Strict (runStateT)
+import Control.Monad.Trans.State.Lazy (runStateT)
 import Data.List (foldl')
 import Data.Map (Map, (!), empty, keys, fromList)
 import qualified Data.Map as Map

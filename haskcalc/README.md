@@ -11,5 +11,5 @@ A calculator which can interpret arithmetic expressions.
 | % | ok |
 | () | ok |
 |HUnit| ok |
-| variables| |
+| variables| ok |
 
