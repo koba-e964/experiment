@@ -12,4 +12,14 @@ A calculator which can interpret arithmetic expressions.
 | () | ok |
 |HUnit| ok |
 | variables| ok |
+| functions | - |
+
+## Dependency
+ * parsec-3.1.5
+ * transformers-0.2.2.0
+
+## How to use
+```
+ ghc Main.hs
+```
 
