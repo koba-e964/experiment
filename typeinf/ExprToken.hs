@@ -31,6 +31,8 @@ data Token
     | AND
     | LT | LE | GT | GE
     | LPAR | RPAR | COMMA
+    | DDOT {- .. -}
+    | SSEQ {- #seq for forcing to evaluate, infix -}
     | EOC
     | EOF
     deriving (Eq, Show)

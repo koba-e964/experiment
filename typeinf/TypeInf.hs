@@ -107,8 +107,9 @@ gatherConstraints !env !expr =
     ELet (Name name) e1 e2 -> do
       (t1, c1) <- gatherConstraints env e1
       substs <- unifyAll c1
-      let etysch = generalize env $ subst substs t1
-      let newtenv = fmap (generalizeTypeScheme env . substTypeScheme substs) env :: TypeEnv
+      let substenv = fmap (substTypeScheme substs) env
+      let etysch = generalize substenv $ subst substs t1
+      let newtenv = fmap ({- generalizeTypeScheme env . -} substTypeScheme substs) env :: TypeEnv
       (t2, c2) <- gatherConstraints (Map.insert name etysch newtenv) e2
       return (t2, c1 ++ c2)
     EFun (Name name) fexpr -> do
@@ -142,6 +143,10 @@ gatherConstraints !env !expr =
     ENil -> do
       a <- newType
       return $ (TList a, [])
+    ESeq ea eb -> do
+      (_ , ca) <- gatherConstraints env ea
+      (tb, cb) <- gatherConstraints env eb
+      return (tb, ca ++ cb)
 
 gatherConsHelper :: (Monad m, Functor m) => TypeEnv -> [(Expr, Type)] -> St m [TypeCons]
 

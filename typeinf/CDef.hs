@@ -1,7 +1,8 @@
 {-# LANGUAGE BangPatterns, DeriveDataTypeable #-}
 module CDef where
 
-import qualified Data.List as List 
+import Data.IORef
+import qualified Data.List as List
 import Data.Typeable
 import Control.Exception
 import Data.Map.Strict (Map)
@@ -106,22 +107,15 @@ data ValueLazy =
      VLInt Int
      | VLBool Bool
      | VLFun Name EnvLazy Expr
-     | VLCons ValueLazy ValueLazy
-     | VLPair ValueLazy ValueLazy
+     | VLCons Thunk Thunk
+     | VLPair Thunk Thunk
      | VLNil
-     deriving (Eq)
 
-instance (Show ValueLazy) where
-  show (VLInt  v) = show v
-  show (VLBool v) = show v
-  show (VLFun (Name name) _ _) = "fun " ++ name ++ " -> (expr)" 
-  show (VLCons vcar vcdr) = "[" ++ sub vcar vcdr (10 :: Int) ++ "]" where
-    sub _ _    0 = "..."
-    sub v VLNil _ = show v
-    sub v1 (VLCons v2 v3) n = show v1 ++ ", " ++ sub v2 v3 (n-1)
-    sub _  _ _ = error "(>_<) < weird... the last cell of the list is not nil..."
-  show (VLPair a b) = "(" ++ show a ++ ", " ++ show b ++ ")"
-  show VLNil = "[]"
+type Thunk =
+     IORef ThunkData
+data ThunkData =
+     Thunk EnvLazy Expr
+     | ThVal ValueLazy {- Memoized -}
 
 
 data Expr  = EConst Value
@@ -140,6 +134,7 @@ data Expr  = EConst Value
            | EApp Expr Expr
            | ECons Expr Expr
            | EPair Expr Expr
+	   | ESeq Expr Expr {- Force evaluation of expr1 before evaluation of expr2 -}
            | ENil
            deriving (Eq, Show)
 data Pat   = PConst Value
@@ -157,7 +152,7 @@ data Command
   deriving (Eq, Show)
 
 type Env = Map String Value
-type EnvLazy = Map String ValueLazy
+type EnvLazy = Map String Thunk
 
 
 {-------------------

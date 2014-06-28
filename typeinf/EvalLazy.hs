@@ -3,6 +3,8 @@ module EvalLazy where
 
 import Control.Applicative
 import Control.Monad.Except
+import Control.Monad.State
+import Data.IORef
 import qualified Data.Map as Map
 
 import CDef hiding (Value, Env)
@@ -10,97 +12,193 @@ import CDef hiding (Value, Env)
 type Value = ValueLazy
 type Env = EnvLazy
 
-type EV m = ExceptT EvalError m
+type EV = ExceptT EvalError (StateT EnvLazy IO)
+liftToEV :: IO a -> EV a
+liftToEV = lift . lift
 
-op2Int :: Monad m => (Int -> Int -> Int) -> Value -> Value -> EV m Value
+op2Int :: (Int -> Int -> Int) -> Value -> Value -> EV Value
 op2Int f (VLInt v1) (VLInt v2) = return $ VLInt (f v1 v2)
-op2Int _ v1 v2 = evalError $ "int required, but got " ++ show v1 ++ ", " ++ show v2
+op2Int _ _v1 _v2 = evalError $ "int required"
 
-op2IntBool :: Monad m => (Int -> Int -> Bool) -> Value -> Value -> EV m Value
+op2IntBool :: (Int -> Int -> Bool) -> Value -> Value -> EV Value
 op2IntBool f (VLInt v1) (VLInt v2) = return $ VLBool (f v1 v2)
-op2IntBool _ v1 v2 = evalError $ "int required, but got " ++ show v1 ++ ", " ++ show v2
+op2IntBool _ _v1 _v2 = evalError $ "int required"
 
 
-evalError :: Monad m => String -> EV m a
+evalError :: String -> EV a
 evalError str = throwError $ EvalError $ str
 
-eval :: (Functor m, Monad m) => Env -> Expr -> EV m Value
-eval _   (EConst (VInt v)) = return $ VLInt v
-eval _   (EConst (VBool v)) = return $ VLBool v
-eval _   (EConst _) = error "(>_<) weird const expression..."
-eval !env (EVar (Name name)) =
+eval :: Expr -> EV Value
+eval (EConst (VInt v)) = return $ VLInt v
+eval (EConst (VBool v)) = return $ VLBool v
+eval (EConst _) = error "(>_<) weird const expression..."
+eval (EVar (Name name)) = do
+    env <- get
     case Map.lookup name env of
-      Just value -> return value
+      Just thunk -> do
+        result <- evalThunk thunk
+	return result
       Nothing    -> evalError $ "Unbound variable: " ++ name
-eval env (EAdd v1 v2) = join $ op2Int (+) <$> (eval env v1) <*> (eval env v2)
-eval env (ESub v1 v2) = join $ op2Int (-) <$> (eval env v1) <*> (eval env v2)
-eval env (EMul v1 v2) = join $ op2Int (*) <$> (eval env v1) <*> (eval env v2)
-eval env (EDiv v1 v2) = join $ op2Int div <$> (eval env v1) <*> (eval env v2)
-eval env (ELt e1 e2)  = join $ op2IntBool (<) <$> (eval env e1) <*> (eval env e2)
-eval env (EEq e1 e2)  = join $ op2IntBool (==) <$> (eval env e1) <*> (eval env e2)
-eval env (EIf vc v1 v2) = do
-  cond <- eval env vc
+eval (EAdd v1 v2) = join $ op2Int (+) <$> (eval v1) <*> (eval v2)
+eval (ESub v1 v2) = join $ op2Int (-) <$> (eval v1) <*> (eval v2)
+eval (EMul v1 v2) = join $ op2Int (*) <$> (eval v1) <*> (eval v2)
+eval (EDiv v1 v2) = join $ op2Int div <$> (eval v1) <*> (eval v2)
+eval (ELt e1 e2)  = join $ op2IntBool (<) <$> (eval e1) <*> (eval e2)
+eval (EEq e1 e2)  = join $ op2IntBool (==) <$> (eval e1) <*> (eval e2)
+eval (EIf vc v1 v2) = do
+  cond <- eval vc
   case cond of
-    VLBool b -> if b then (eval env v1) else (eval env v2)
+    VLBool b -> if b then (eval v1) else (eval v2)
     _	    -> evalError "EIf"
-eval env (ELet (Name name) ei eo) = do
-    val <- eval env ei
-    let newenv = Map.insert name val env
-    eval newenv eo
-eval env (ERLets bindings expr) = do
+eval (ELet (Name name) ei eo) = do
+    env <- get
+    thunk <- liftToEV $ newIORef (Thunk env ei)
+    let newenv = Map.insert name thunk env
+    put newenv
+    res <- eval eo
+    put env
+    return res
+eval (ERLets bindings expr) = do
+     env <- get
      newenv <- getNewEnvInRLets bindings env
-     eval newenv expr
-eval env (EMatch expr patex) = do
-     val <- eval env expr
-     tryMatchAll val env patex
-eval env (EFun name expr) = return $ VLFun name env expr
-eval env (EApp func argv) = join $ evalApp <$> (eval env func) <*> (eval env argv)
-eval env (ECons e1 e2) = VLCons <$> eval env e1 <*> eval env e2
-eval env (EPair e1 e2) = VLPair <$> eval env e1 <*> eval env e2
-eval _   ENil          = return VLNil
+     put newenv
+     ret <- eval expr
+     put env
+     return ret
+eval (EMatch expr patex) = do
+     env <- get
+     thunk <- liftToEV $ newIORef $ Thunk env expr
+     tryMatchAll thunk env patex
+eval (EFun name expr) = do
+     env <- get
+     return $ VLFun name env expr
+eval (EApp func argv) = do
+     env <- get
+     join $ evalApp <$> (eval func) <*> liftToEV (newIORef (Thunk env argv))
+eval (ECons e1 e2) = do
+     env <- get
+     t1 <- liftToEV $ newIORef $ Thunk env e1
+     t2 <- liftToEV $ newIORef $ Thunk env e2
+     return $ VLCons t1 t2
+eval (EPair e1 e2) = do
+     env <- get
+     t1 <- liftToEV $ newIORef $ Thunk env e1
+     t2 <- liftToEV $ newIORef $ Thunk env e2
+     return $ VLPair t1 t2
+eval ENil          = return VLNil
+eval (ESeq ea eb)  = do
+     _ <- eval ea
+     eval eb
 
-evalApp :: (Functor m, Monad m) => Value -> Value -> EV m Value
-evalApp fval aval =
+evalApp :: Value -> Thunk -> EV Value
+evalApp fval ath =
   case fval of
-    VLFun (Name param) fenv expr -> eval (Map.insert param aval fenv) expr
-    others                       -> evalError $ "app: not a function: " ++ show others
+    VLFun (Name param) fenv expr -> do
+      oldenv <- get
+      put $ Map.insert param ath fenv
+      ret <- eval expr
+      put oldenv
+      return ret
+    _others                      -> evalError $ "app: not a function" 
 
-getNewEnvInRLets :: (Functor m, Monad m) => [(Name, Expr)] -> Env -> EV m Env
+getNewEnvInRLets :: [(Name, Expr)] -> Env -> EV Env
 getNewEnvInRLets bindings oldenv = mnewenv where
-  mnewenv = sub oldenv bindings 0 
-  sub env [] _ = return env
-  sub env ((Name fname, fexpr) : rest) num = do
-	newenv <- mnewenv
-        thunk <- eval newenv fexpr
-        sub (Map.insert fname thunk env) rest (num + 1)
+  mnewenv = sub oldenv bindings
+  sub env [] = return env
+  sub env ((Name fname, fexpr) : rest) = do
+        thunk <- liftToEV $ newIORef $ Thunk env (ERLets bindings fexpr)
+        sub (Map.insert fname thunk env) rest
 
-tryMatchAll :: (Functor m, Monad m) => Value -> Env -> [(Pat, Expr)] -> EV m Value
+tryMatchAll :: Thunk -> Env -> [(Pat, Expr)] -> EV Value
 tryMatchAll _    _  []                   = evalError "Matching not exhaustive"
-tryMatchAll val env ((pat, expr) : rest) = case tryMatch val env pat of
-  Nothing     -> tryMatchAll val env rest
-  Just newenv -> eval newenv expr
+tryMatchAll thunk env ((pat, expr) : rest) = do
+  pickOne <- tryMatch thunk env pat
+  case pickOne of
+    Nothing     -> tryMatchAll thunk env rest
+    Just newenv -> do
+       put newenv
+       ret <- eval expr
+       put env
+       return ret
 
-tryMatch :: Value -> Env -> Pat -> Maybe Env
-tryMatch val env pat = case pat of
-  PConst (VBool b) -> case val of
-      VLBool c -> if c == b then Just env else Nothing
-      _	       -> Nothing
-  PConst (VInt b) -> case val of
-      VLInt c -> if c == b then Just env else Nothing
-      _	      -> Nothing
-  PVar (Name vname) -> Just $! Map.insert vname val env
-  PCons pcar pcdr   -> case val of
-    VLCons vcar vcdr -> do
-      ex <- tryMatch vcar env pcar
-      ey <- tryMatch vcdr env pcdr
-      return $! Map.union ey (Map.union ex env)
-    _ 	            -> Nothing
-  PPair pfst psnd   -> case val of
-    VLPair vfst vsnd -> do
-      ex <- tryMatch vfst env pfst
-      ey <- tryMatch vsnd env psnd
-      return $! Map.union ey $ Map.union ex env
-    _ 	            -> Nothing
-  PNil              -> case val of
-    VLNil  -> Just env
-    _     -> Nothing
+tryMatch :: Thunk -> Env -> Pat -> EV (Maybe Env)
+tryMatch thunk env pat = case pat of
+  PConst (VBool b) -> do
+    val <- evalThunk thunk
+    case val of
+      VLBool c -> if c == b then return $ Just env else return Nothing
+      _	       -> return Nothing
+  PConst (VInt b) -> do
+    val <- evalThunk thunk
+    case val of
+      VLInt c -> if c == b then return $ Just env else return Nothing
+      _	      -> return Nothing
+  PConst _     -> error "weird const pattern... (>_<)"
+  PVar (Name vname) -> return $ Just $! Map.insert vname thunk env
+  PCons pcar pcdr   -> do
+    val <- evalThunk thunk
+    case val of
+      VLCons vcar vcdr -> do
+        ex <- tryMatch vcar env pcar
+        ey <- tryMatch vcdr env pcdr
+        return $ do
+          mex <- ex
+          mey <- ey
+          return $! Map.union mey (Map.union mex env)
+      _notused       -> return Nothing
+  PPair pfst psnd   -> do
+    val <- evalThunk thunk
+    case val of
+      VLPair vfst vsnd -> do
+        ex <- tryMatch vfst env pfst
+        ey <- tryMatch vsnd env psnd
+        return $ do
+          mex <- ex
+          mey <- ey
+          return $! Map.union mey (Map.union mex env)
+      _notused         -> return Nothing
+  PNil              -> do
+    val <- evalThunk thunk
+    case val of
+      VLNil  -> return $ Just env
+      _      -> return Nothing
+
+evalThunk :: Thunk -> EV Value
+evalThunk thunk = do
+  dat <- liftToEV $ readIORef thunk
+  case dat of
+    Thunk env expr -> do
+      oldenv <- get
+      put env
+      ret <- eval expr
+      put oldenv
+      liftToEV $ writeIORef thunk (ThVal ret)
+      return ret
+    ThVal value -> return value
+
+showValueLazy :: Value -> EV String
+showValueLazy (VLInt  v) = return $ show v
+showValueLazy (VLBool v) = return $ show v
+showValueLazy (VLFun (Name name) _ _) = return $ "fun " ++ name ++ " -> (expr)" 
+showValueLazy (VLCons tcar tcdr) = do
+    inner <- sub tcar tcdr (10 :: Int)
+    return $ "[" ++ inner ++ "]" where
+    sub _ _    0 = return "..."
+    sub t1 tcdr' n = do
+      v1 <- evalThunk t1
+      vcdr <- evalThunk tcdr'
+      case vcdr of
+        VLNil -> showValueLazy v1
+        VLCons t2 t3 -> do
+          sv <- showValueLazy v1
+          sr <- sub t2 t3 (n-1)
+          return $ sv ++ ", " ++ sr
+        _     -> error "(>_<) < weird... the last cell of the list is not nil..."
+showValueLazy (VLPair a b) = do
+    va <- evalThunk a
+    sa <- showValueLazy va
+    vb <- evalThunk b
+    sb <- showValueLazy vb
+    return $ "(" ++ sa ++ ", " ++ sb ++ ")"
+showValueLazy VLNil = return "[]"
+

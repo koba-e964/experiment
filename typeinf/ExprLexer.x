@@ -57,6 +57,9 @@ tokens :-
   "["         { \_->LBRACKET }
   "]"         { \_->RBRACKET }
   ","         { \_->COMMA    }
+  ".."        { \_->DDOT     }
+
+  "#seq"      { \_->SSEQ }
 
   $digit+ { \n ->INT (read n) }
   $alpha [$alpha $digit \_ \']* { ID }
