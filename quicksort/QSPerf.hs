@@ -2,6 +2,8 @@
 module Main where
  
 import Data.Array.ST
+import Data.Int
+import Data.List
 import Control.Monad
 import Control.Monad.ST
 import Control.DeepSeq
@@ -63,6 +65,7 @@ sortInplace ary !low !high
     sub0 low high
 qsort1 :: (Ord a) => [a] -> [a]
 qsort1 ls = let n = length ls in
+
   case n of
     0 -> []
     1 -> ls
@@ -89,14 +92,17 @@ quickSort ls = quickSort l1 ++ l2 ++ quickSort l3 where
     LT -> divide xs (x:p1) p2 p3
     EQ -> divide xs p1 (x:p2) p3
     GT -> divide xs p1 p2 (x:p3)
- 
-time :: (forall a. Ord a => [a] -> [a]) -> Int -> IO NominalDiffTime
-time sorter n = do
-  ls <- sequence (replicate n randomIO) :: IO [Int]
+
+hash :: [Int] -> Int64
+hash ls = foldl' (\e x -> e * 31373 + fromIntegral x) 0 ls
+
+
+time :: (forall a. Ord a => [a] -> [a]) -> [Int] -> IO (Int64, NominalDiffTime)
+time sorter ls = do
   from <- getCurrentTime
   let srt = sorter ls
   to   <- deepseq srt getCurrentTime
-  return $ diffUTCTime to from
+  return $ (hash srt, diffUTCTime to from)
  
 -- | /O(n*log(n))/. Mergesort. 
 --   This sort is stable.
@@ -112,20 +118,23 @@ mergeSort ls = merge (mergeSort p1) (mergeSort p2) where
     if x<=y then x : merge xs (y:ys) -- For stability, @merge@ prefers the first list when it encounters equal elements.
        else y : merge (x:xs) ys
 
+summary :: String -> (forall a. Ord a => [a] -> [a]) -> [Int] -> IO ()
+summary algName sorter ls = do
+   (hashVal, t1) <- time sorter ls
+   putStrLn $ algName ++ ":" ++ show t1 ++ " sec"
+   putStrLn $ "  hash: " ++ show hashVal
+
+
 main :: IO ()
 main = do
    args <- getArgs
    let n = read $ if length args >= 1 then args !! 0 else "100000"
-   t1 <- time qsort1 n
-   putStrLn $ "qsort1:" ++ show t1 ++ " sec"
-   t2 <- time quickSort n
-   putStrLn $ "quickSort:" ++ show t2 ++ " sec"
-   t3 <- time mergeSort n
-   putStrLn $ "mergeSort:" ++ show t3 ++ " sec"
-   t3 <- time mergeSort n
-   putStrLn $ "mergeSort:" ++ show t3 ++ " sec"
-   t2 <- time quickSort n
-   putStrLn $ "quickSort:" ++ show t2 ++ " sec"
-   t1 <- time qsort1 n
-   putStrLn $ "qsort1:" ++ show t1 ++ " sec"
+   ls <- sequence (replicate n randomIO) :: IO [Int]
+   summary "qsort1" qsort1 ls
+   summary "quickSort" quickSort ls
+   summary "mergeSort" mergeSort ls
+   ls2 <- sequence (replicate n randomIO) :: IO [Int]
+   summary "mergeSort" mergeSort ls2
+   summary "quickSort" quickSort ls2
+   summary "qsort1" qsort1 ls2
 
