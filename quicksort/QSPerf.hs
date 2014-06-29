@@ -98,12 +98,34 @@ time sorter n = do
   to   <- deepseq srt getCurrentTime
   return $ diffUTCTime to from
  
- 
+-- | /O(n*log(n))/. Mergesort. 
+--   This sort is stable.
+mergeSort :: Ord a => [a] -> [a]
+mergeSort [] = []
+mergeSort [a] = [a]
+mergeSort [a,b] = if a<=b then [a,b] else [b,a]
+mergeSort ls = merge (mergeSort p1) (mergeSort p2) where
+  (p1, p2) = splitAt (length ls `div` 2) ls -- halves the list
+  merge [] ls' = ls'
+  merge ls' [] = ls'
+  merge (x:xs) (y:ys) =
+    if x<=y then x : merge xs (y:ys) -- For stability, @merge@ prefers the first list when it encounters equal elements.
+       else y : merge (x:xs) ys
+
 main :: IO ()
 main = do
    args <- getArgs
    let n = read $ if length args >= 1 then args !! 0 else "100000"
    t1 <- time qsort1 n
-   t2 <- time quickSort n
    putStrLn $ "qsort1:" ++ show t1 ++ " sec"
+   t2 <- time quickSort n
    putStrLn $ "quickSort:" ++ show t2 ++ " sec"
+   t3 <- time mergeSort n
+   putStrLn $ "mergeSort:" ++ show t3 ++ " sec"
+   t3 <- time mergeSort n
+   putStrLn $ "mergeSort:" ++ show t3 ++ " sec"
+   t2 <- time quickSort n
+   putStrLn $ "quickSort:" ++ show t2 ++ " sec"
+   t1 <- time qsort1 n
+   putStrLn $ "qsort1:" ++ show t1 ++ " sec"
+
