@@ -121,7 +121,7 @@ mergeSort ls = merge (mergeSort p1) (mergeSort p2) where
 summary :: String -> (forall a. Ord a => [a] -> [a]) -> [Int] -> IO ()
 summary algName sorter ls = do
    (hashVal, t1) <- time sorter ls
-   putStrLn $ algName ++ ":" ++ show t1 ++ " sec"
+   putStrLn $ algName ++ ":" ++ show t1
    putStrLn $ "  hash: " ++ show hashVal
 
 
@@ -130,11 +130,11 @@ main = do
    args <- getArgs
    let n = read $ if length args >= 1 then args !! 0 else "100000"
    ls <- sequence (replicate n randomIO) :: IO [Int]
-   summary "qsort1" qsort1 ls
+   deepseq ls $ summary "qsort1" qsort1 ls
    summary "quickSort" quickSort ls
    summary "mergeSort" mergeSort ls
    ls2 <- sequence (replicate n randomIO) :: IO [Int]
-   summary "mergeSort" mergeSort ls2
+   deepseq ls2 $ summary "mergeSort" mergeSort ls2
    summary "quickSort" quickSort ls2
    summary "qsort1" qsort1 ls2
 
